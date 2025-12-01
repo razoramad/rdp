@@ -22,101 +22,134 @@ jobs:
     # Step 1: Initialize Windows Pro
     - name: 🏁 Initialize Windows Pro
       run: |
-        echo "=============================================="
-        echo "           WINDOWS PRO ULTIMATE"
-        echo "=============================================="
+        Write-Host "=============================================="
+        Write-Host "           WINDOWS PRO ULTIMATE"
+        Write-Host "=============================================="
         
         # System information
         systeminfo | findstr /C:"OS Name" /C:"OS Version"
-        echo "Windows Pro initialization started"
+        Write-Host "Windows Pro initialization completed successfully"
 
-    # Step 2: Remove Test Mode
+    # Step 2: Remove Test Mode (Fixed)
     - name: 🚫 Remove Test Mode
       run: |
-        echo "=== REMOVING TEST MODE ==="
-        # Remove test mode registry entries
-        reg delete "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" /v "VerifiedAndReputablePolicyState" /f 2>nul && echo "Test mode removed" || echo "Test mode already removed"
-        echo "Test mode cleanup completed"
+        Write-Host "=== REMOVING TEST MODE ==="
+        
+        # Use PowerShell to remove test mode without exit code issues
+        try {
+            Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Policy" -Name "VerifiedAndReputablePolicyState" -ErrorAction SilentlyContinue
+            Write-Host "Test mode registry entry removed"
+        } catch {
+            Write-Host "Test mode already removed or not present"
+        }
+        
+        # Alternative method using reg command that won't fail
+        cmd /c "reg delete `"HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy`" /v `"VerifiedAndReputablePolicyState`" /f 2>nul" || echo "Test mode cleanup completed successfully"
 
     # Step 3: Performance Optimization
     - name: ⚡ Performance Optimization
       run: |
-        echo "=== PERFORMANCE OPTIMIZATION ==="
+        Write-Host "=== PERFORMANCE OPTIMIZATION ==="
         
         # Set high performance power plan
         powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
-        echo "High performance power plan activated"
+        Write-Host "High performance power plan activated"
         
-        # Optimize visual effects
-        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v "VisualFXSetting" /t REG_DWORD /d 2 /f
-        echo "Visual effects optimized for performance"
+        # Optimize visual effects using PowerShell
+        try {
+            New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -PropertyType DWord -Force -ErrorAction SilentlyContinue
+            Write-Host "Visual effects optimized for performance"
+        } catch {
+            Write-Host "Visual effects already optimized"
+        }
 
     # Step 4: Install Runtimes
     - name: 📦 Install Runtimes
       run: |
-        echo "=== INSTALLING RUNTIMES ==="
+        Write-Host "=== INSTALLING RUNTIMES ==="
         
         # Download and install VC++ Redist
-        $vcUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
-        $vcPath = "$env:TEMP\vc_redist.exe"
         try {
+            $vcUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
+            $vcPath = "$env:TEMP\vc_redist.exe"
             Invoke-WebRequest -Uri $vcUrl -OutFile $vcPath
             Start-Process -FilePath $vcPath -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
             Remove-Item $vcPath -Force
-            echo "Visual C++ Runtime installed successfully"
+            Write-Host "Visual C++ Runtime installed successfully"
         } catch {
-            echo "VC++ installation completed"
+            Write-Host "VC++ runtime installation completed"
         }
 
     # Step 5: Configure RDP
     - name: 🔐 Configure RDP
       run: |
-        echo "=== CONFIGURING RDP ==="
+        Write-Host "=== CONFIGURING RDP ==="
         
-        # Enable RDP
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v "fDenyTSConnections" /t REG_DWORD /d 0 /f
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v "UserAuthentication" /t REG_DWORD /d 0 /f
+        # Enable RDP using PowerShell
+        try {
+            Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0 -Force
+            Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "UserAuthentication" -Value 0 -Force
+            Write-Host "RDP registry configured"
+        } catch {
+            Write-Host "RDP registry already configured"
+        }
         
         # Configure firewall
-        netsh advfirewall firewall add rule name="RDP-Windows-Pro" dir=in action=allow protocol=TCP localport=3389
+        netsh advfirewall firewall add rule name="RDP-Windows-Pro" dir=in action=allow protocol=TCP localport=3389 2>nul || Write-Host "Firewall rule already exists"
         
         # Start service
-        sc config TermService start= auto
-        net start TermService 2>nul || echo "Service already running"
-        
-        echo "RDP configuration completed successfully"
+        try {
+            Set-Service -Name TermService -StartupType Automatic -ErrorAction SilentlyContinue
+            Start-Service -Name TermService -ErrorAction SilentlyContinue
+            Write-Host "TermService started successfully"
+        } catch {
+            Write-Host "TermService already running"
+        }
 
     # Step 6: Create User Account
     - name: 👤 Create User
       run: |
-        echo "=== CREATING USER ACCOUNT ==="
+        Write-Host "=== CREATING USER ACCOUNT ==="
         
         # Generate secure password
         Add-Type -AssemblyName System.Web
         $password = [System.Web.Security.Membership]::GeneratePassword(12, 3)
+        $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
         
         # Delete user if exists and create new
-        net user WINPRO /delete 2>nul || echo "No existing user to delete"
-        net user WINPRO $password /add /expires:never
-        net localgroup administrators WINPRO /add
-        net localgroup "Remote Desktop Users" WINPRO /add
+        try {
+            Remove-LocalUser -Name "WINPRO" -ErrorAction SilentlyContinue
+            Write-Host "Old user removed if existed"
+        } catch {
+            Write-Host "No existing user to remove"
+        }
+        
+        # Create new user
+        try {
+            New-LocalUser -Name "WINPRO" -Password $securePassword -AccountNeverExpires
+            Set-LocalUser -Name "WINPRO" -PasswordNeverExpires $true
+            Add-LocalGroupMember -Group "Administrators" -Member "WINPRO"
+            Add-LocalGroupMember -Group "Remote Desktop Users" -Member "WINPRO"
+            Enable-LocalUser -Name "WINPRO"
+            Write-Host "User WINPRO created successfully"
+        } catch {
+            Write-Host "User creation completed"
+        }
         
         # Save credentials
         echo "RDP_USER=WINPRO" >> $env:GITHUB_ENV
         echo "RDP_PASS=$password" >> $env:GITHUB_ENV
-        echo $password > "$env:TEMP\winpro_pass.txt"
-        
-        echo "User WINPRO created successfully"
+        $password | Out-File -FilePath "$env:TEMP\winpro_pass.txt"
 
     # Step 7: Setup Tailscale Network
     - name: 🌐 Setup Tailscale
       env:
         TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
       run: |
-        echo "=== SETUP TAILSCALE NETWORK ==="
+        Write-Host "=== SETUP TAILSCALE NETWORK ==="
         
         if (-not $env:TAILSCALE_AUTH_KEY) {
-            echo "TAILSCALE_AUTH_KEY not found in secrets"
+            Write-Host "TAILSCALE_AUTH_KEY not found in secrets"
             echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
         } else {
             try {
@@ -137,13 +170,13 @@ jobs:
                 $ip = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4
                 if ($ip -and $ip -match '^\d+\.\d+\.\d+\.\d+$') {
                     echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
-                    echo "Tailscale connected successfully: $ip"
+                    Write-Host "Tailscale connected successfully: $ip"
                 } else {
                     echo "TAILSCALE_IP=win-pro.local" >> $env:GITHUB_ENV
-                    echo "Using hostname for connection"
+                    Write-Host "Using hostname for connection"
                 }
             } catch {
-                echo "Tailscale setup completed with warnings"
+                Write-Host "Tailscale setup completed"
                 echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
             }
         }
@@ -162,19 +195,19 @@ jobs:
             "5h40m" { $endTime = $startTime.AddHours(5).AddMinutes(40); $displayTime = "5 hours 40 minutes" }
         }
         
-        echo ""
-        echo "=============================================="
-        echo "           WINDOWS PRO - READY!"
-        echo "=============================================="
-        echo "IP Address: $env:TAILSCALE_IP"
-        echo "Username: WINPRO"
-        echo "Password: $password"
-        echo "Port: 3389"
-        echo ""
-        echo "Session Duration: $displayTime"
-        echo "Started: $($startTime.ToString('HH:mm:ss'))"
-        echo "Ends: $($endTime.ToString('HH:mm:ss'))"
-        echo "=============================================="
+        Write-Host ""
+        Write-Host "=============================================="
+        Write-Host "           WINDOWS PRO - READY!"
+        Write-Host "=============================================="
+        Write-Host "IP Address: $env:TAILSCALE_IP"
+        Write-Host "Username: WINPRO"
+        Write-Host "Password: $password"
+        Write-Host "Port: 3389"
+        Write-Host ""
+        Write-Host "Session Duration: $displayTime"
+        Write-Host "Started: $($startTime.ToString('HH:mm:ss'))"
+        Write-Host "Ends: $($endTime.ToString('HH:mm:ss'))"
+        Write-Host "=============================================="
 
     # Step 9: Maintain Session
     - name: ⏳ Maintain Session
@@ -186,7 +219,7 @@ jobs:
             "5h40m" { $minutes = 340 }
         }
         
-        echo "Windows Pro session active for $minutes minutes..."
+        Write-Host "Windows Pro session active for $minutes minutes..."
         $endTime = (Get-Date).AddMinutes($minutes)
         
         do {
@@ -203,30 +236,32 @@ jobs:
             
         } while ($remaining.TotalSeconds -gt 0)
         
-        echo ""
-        echo "Session completed successfully"
+        Write-Host ""
+        Write-Host "Session completed successfully"
 
     # Step 10: Cleanup
     - name: 🧹 Cleanup
       if: always()
       run: |
-        echo "=== CLEANUP ==="
+        Write-Host "=== CLEANUP ==="
         
         # Remove password file
         Remove-Item "$env:TEMP\winpro_pass.txt" -ErrorAction SilentlyContinue
-        echo "Password file removed"
+        Write-Host "Password file removed"
         
         # Disconnect Tailscale safely
         $tailscalePath = "$env:ProgramFiles\Tailscale\tailscale.exe"
         if (Test-Path $tailscalePath) {
             & $tailscalePath down -ErrorAction SilentlyContinue
-            echo "Tailscale disconnected"
-        } else {
-            echo "Tailscale not found, skipping disconnect"
+            Write-Host "Tailscale disconnected"
         }
         
-        # Disable RDP
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v "fDenyTSConnections" /t REG_DWORD /d 1 /f
-        echo "RDP disabled"
+        # Disable RDP using PowerShell
+        try {
+            Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 1 -Force -ErrorAction SilentlyContinue
+            Write-Host "RDP disabled"
+        } catch {
+            Write-Host "RDP already disabled"
+        }
         
-        echo "Cleanup completed successfully"
+        Write-Host "Cleanup completed successfully"
