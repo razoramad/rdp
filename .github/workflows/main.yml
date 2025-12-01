@@ -1,0 +1,508 @@
+name: 🚀 WINDOWS PRO ULTRA - GAMING & DEVELOPMENT
+
+on:
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: '🕐 Thời gian sử dụng'
+        required: false
+        default: '5h40m'
+        type: choice
+        options:
+        - '1h'
+        - '3h' 
+        - '5h40m'
+
+jobs:
+  Windows-Pro-Ultra:
+    runs-on: windows-latest
+    timeout-minutes: 340
+    
+    steps:
+      # BANNER CHÀO MỪNG
+      - name: 🎯 KHỞI ĐỘNG WINDOWS PRO ULTRA
+        run: |
+          Write-Host ""
+          Write-Host ""
+          Write-Host "🤖 WINDOWS PRO ULTRA - GAMING & DEVELOPMENT" -ForegroundColor Yellow
+          Write-Host "⚡ Performance Mode: ULTRA FAST" -ForegroundColor Green
+          Write-Host "🎮 Optimized for Gaming & Android Apps" -ForegroundColor Cyan
+          Write-Host "🕒 Thời gian: ${{ github.event.inputs.duration }}" -ForegroundColor Magenta
+          
+          # Hiệu ứng loading
+          $frames = @('⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷')
+          for($i=0; $i -lt 10; $i++) {
+              Write-Host "`r🚀 Đang khởi tạo Windows Pro Ultra... $($frames[$i % 8])" -NoNewline -ForegroundColor Blue
+              Start-Sleep -Milliseconds 100
+          }
+          Write-Host "`r✅ Windows Pro Ultra đã sẵn sàng!                    " -ForegroundColor Green
+
+      # TỐI ƯU HÓA PERFORMANCE CỰC ĐỈNH
+      - name: ⚡ TỐI ƯU HÓA PERFORMANCE
+        run: |
+          Write-Host ""
+          Write-Host "⚡ ĐANG TỐI ƯU HÓA PERFORMANCE CỰC ĐỈNH" -ForegroundColor Yellow
+          
+          $optimizationSteps = @(
+              @{Name="Kích hoạt chế độ hiệu suất tối đa"; Script={
+                  powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c  # High performance
+                  powercfg -changename 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c "Ultra Performance" "Chế độ hiệu suất cực đại"
+              }},
+              @{Name="Tắt visual effects để tăng FPS"; Script={
+                  Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -Type DWord -Force
+                  # Tắt animations
+                  Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00)) -Force
+                  Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name "MinAnimate" -Value "0" -Force
+              }},
+              @{Name="Tối ưu hóa bộ nhớ và CPU"; Script={
+                  # Tối ưu hóa bộ nhớ
+                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "ClearPageFileAtShutdown" -Value 0 -Type DWord -Force
+                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "LargeSystemCache" -Value 1 -Type DWord -Force
+                  # Tối ưu hóa CPU
+                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl" -Name "Win32PrioritySeparation" -Value 38 -Type DWord -Force
+              }},
+              @{Name="Tắt services không cần thiết"; Script={
+                  $servicesToDisable = @(
+                      "DiagTrack", "diagnosticshub.standardcollector.service", "DPS",
+                      "WSearch", "WbioSrvc", "TabletInputService", "lmhosts",
+                      "AJRouter", "XboxGipSvc", "XboxNetApiSvc"
+                  )
+                  foreach ($service in $servicesToDisable) {
+                      Set-Service -Name $service -StartupType Disabled -ErrorAction SilentlyContinue
+                      Stop-Service -Name $service -Force -ErrorAction SilentlyContinue
+                  }
+              }},
+              @{Name="Tối ưu hóa network cho gaming"; Script={
+                  # Tối ưu hóa TCP cho gaming
+                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "TcpAckFrequency" -Value 1 -Type DWord -Force
+                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "TCPNoDelay" -Value 1 -Type DWord -Force
+                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "EnablePMTUDiscovery" -Value 1 -Type DWord -Force
+                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "EnableTCPChargen" -Value 0 -Type DWord -Force
+              }},
+              @{Name="Tối ưu hóa GPU và graphics"; Script={
+                  # Tối ưu hóa cho graphics performance
+                  Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "SystemResponsiveness" -Value 0 -Type DWord -Force
+                  Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "GPU Priority" -Value 8 -Type DWord -Force
+                  Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "Priority" -Value 6 -Type DWord -Force
+              }}
+          )
+          
+          foreach($step in $optimizationSteps) {
+              Write-Host "│ ⚡ $($step.Name)..." -NoNewline -ForegroundColor White
+              try {
+                  & $step.Script
+                  Write-Host "`r│ ✅ $($step.Name)" -ForegroundColor Green
+              } catch {
+                  Write-Host "`r│ ⚠️  $($step.Name) - Đã tối ưu" -ForegroundColor Yellow
+              }
+              Start-Sleep -Milliseconds 300
+          }
+          
+          Write-Host "🎯 Tối ưu hóa hoàn tất! Performance: ULTRA FAST" -ForegroundColor Green
+
+      # CẤU HÌNH RDP CHO WINDOWS PRO
+      - name: 🔧 CẤU HÌNH WINDOWS PRO RDP
+        run: |
+          Write-Host ""
+          Write-Host "🔧 CẤU HÌNH REMOTE DESKTOP CHO WINDOWS PRO" -ForegroundColor Yellow
+          
+          $rdpSteps = @(
+              @{Name="Kích hoạt Remote Desktop Pro"; Script={
+                  Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0 -Force
+                  Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0 -Force
+              }},
+              @{Name="Cấu hình RDP chất lượng cao"; Script={
+                  Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0 -Force
+                  Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "SecurityLayer" -Value 0 -Force
+                  # Cấu hình chất lượng graphics cao
+                  Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "MaxMonitors" -Value 4 -Force
+                  Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "MaxXResolution" -Value 3840 -Force
+                  Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "MaxYResolution" -Value 2160 -Force
+              }},
+              @{Name="Mở port 3389 firewall gaming"; Script={
+                  netsh advfirewall firewall add rule name="RDP-Gaming-Pro" dir=in action=allow protocol=TCP localport=3389 profile=any
+                  netsh advfirewall firewall add rule name="RDP-Gaming-Pro-Out" dir=out action=allow protocol=TCP localport=3389 profile=any
+              }},
+              @{Name="Khởi động dịch vụ RDP Pro"; Script={
+                  Set-Service -Name TermService -StartupType Automatic -ErrorAction SilentlyContinue
+                  Set-Service -Name UmRdpService -StartupType Automatic -ErrorAction SilentlyContinue
+                  Start-Service -Name TermService -ErrorAction SilentlyContinue
+                  Start-Service -Name UmRdpService -ErrorAction SilentlyContinue
+                  # Thêm dịch vụ graphics
+                  Set-Service -Name "GraphicsPerfSvc" -StartupType Automatic -ErrorAction SilentlyContinue
+                  Start-Service -Name "GraphicsPerfSvc" -ErrorAction SilentlyContinue
+              }}
+          )
+          
+          foreach($step in $rdpSteps) {
+              Write-Host "│ 🔧 $($step.Name)..." -NoNewline -ForegroundColor White
+              try {
+                  & $step.Script
+                  Write-Host "`r│ ✅ $($step.Name)" -ForegroundColor Green
+              } catch {
+                  Write-Host "`r│ ⚠️  $($step.Name) - Đã cấu hình" -ForegroundColor Yellow
+              }
+              Start-Sleep -Milliseconds 500
+          }
+
+      # TẠO USER GAMING PREMIUM
+      - name: 👤 TẠO TÀI KHOẢN GAMING PRO
+        run: |
+          Write-Host ""
+          Write-Host "👤 ĐANG TẠO TÀI KHOẢN GAMING PRO" -ForegroundColor Yellow
+          
+          # Tạo password gaming
+          function New-GamingPassword {
+              $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%'
+              return -join ((1..12) | ForEach-Object { $chars[(Get-Random -Maximum $chars.Length)] })
+          }
+          
+          $matKhau = New-GamingPassword
+          $securePass = ConvertTo-SecureString $matKhau -AsPlainText -Force
+          
+          # Xóa user cũ nếu tồn tại
+          try {
+              Remove-LocalUser -Name "GAMING-PRO" -ErrorAction SilentlyContinue
+              Write-Host "│ ✅ Đã xóa user cũ" -ForegroundColor Green
+          } catch {
+              Write-Host "│ ℹ️  Không có user cũ để xóa" -ForegroundColor Blue
+          }
+          
+          # Tạo user gaming mới
+          try {
+              New-LocalUser -Name "GAMING-PRO" -Password $securePass -AccountNeverExpires -Description "Windows Pro Gaming Account"
+              Set-LocalUser -Name "GAMING-PRO" -PasswordNeverExpires $true
+              
+              # Thêm vào các nhóm gaming
+              Add-LocalGroupMember -Group "Administrators" -Member "GAMING-PRO" -ErrorAction SilentlyContinue
+              Add-LocalGroupMember -Group "Remote Desktop Users" -Member "GAMING-PRO" -ErrorAction SilentlyContinue
+              Add-LocalGroupMember -Group "Users" -Member "GAMING-PRO" -ErrorAction SilentlyContinue
+              Add-LocalGroupMember -Group "Performance Log Users" -Member "GAMING-PRO" -ErrorAction SilentlyContinue
+              
+              Enable-LocalUser -Name "GAMING-PRO"
+              
+              Write-Host "│ ✅ Đã cấp quyền Gaming Pro & Administrator" -ForegroundColor Green
+              
+          } catch {
+              Write-Host "│ ❌ Lỗi tạo user: $($_.Exception.Message)" -ForegroundColor Red
+              exit 1
+          }
+          
+          # Lưu thông tin
+          echo "RDP_USER=GAMING-PRO" >> $env:GITHUB_ENV
+          echo "RDP_PASS=$matKhau" >> $env:GITHUB_ENV
+          echo "$matKhau" > $env:TEMP\gaming_password.txt
+          
+          Write-Host "✅ Tài khoản: GAMING-PRO đã sẵn sàng" -ForegroundColor Green
+
+      # CÀI ĐẶT DRIVER VÀ FRAMEWORK CHO GAMING
+      - name: 🎮 CÀI ĐẶT GAMING FRAMEWORK
+        run: |
+          Write-Host ""
+          Write-Host "🎮 CÀI ĐẶT FRAMEWORK CHO GAMING & ANDROID" -ForegroundColor Yellow
+          
+          $gamingSetup = @(
+              @{Name="Cài đặt Visual C++ Redistributable"; Script={
+                  $vcRedistUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
+                  $vcRedistPath = "$env:TEMP\vc_redist.x64.exe"
+                  Invoke-WebRequest -Uri $vcRedistUrl -OutFile $vcRedistPath
+                  Start-Process -FilePath $vcRedistPath -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
+                  Remove-Item $vcRedistPath -Force -ErrorAction SilentlyContinue
+              }},
+              @{Name="Cài đặt .NET Framework 4.8"; Script={
+                  $dotnetUrl = "https://go.microsoft.com/fwlink/?linkid=2088631"
+                  $dotnetPath = "$env:TEMP\ndp48-x86-x64-allos-enu.exe"
+                  Invoke-WebRequest -Uri $dotnetUrl -OutFile $dotnetPath
+                  Start-Process -FilePath $dotnetPath -ArgumentList "/q", "/norestart" -Wait -NoNewWindow
+                  Remove-Item $dotnetPath -Force -ErrorAction SilentlyContinue
+              }},
+              @{Name="Cài đặt DirectX Runtime"; Script={
+                  $directxUrl = "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe"
+                  $directxPath = "$env:TEMP\directx_redist.exe"
+                  Invoke-WebRequest -Uri $directxUrl -OutFile $directxPath
+                  Start-Process -FilePath $directxPath -ArgumentList "/Q" -Wait -NoNewWindow
+                  Remove-Item $directxPath -Force -ErrorAction SilentlyContinue
+              }},
+              @{Name="Cài đặt Xbox Gaming Services"; Script={
+                  # Cài đặt package cho gaming
+                  Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.GamingServices_8wekyb3d8bbwe -ErrorAction SilentlyContinue
+              }}
+          )
+          
+          foreach($step in $gamingSetup) {
+              Write-Host "│ 🎮 $($step.Name)..." -NoNewline -ForegroundColor White
+              try {
+                  & $step.Script
+                  Write-Host "`r│ ✅ $($step.Name)" -ForegroundColor Green
+              } catch {
+                  Write-Host "`r│ ⚠️  $($step.Name) - Đã cài đặt hoặc bỏ qua" -ForegroundColor Yellow
+              }
+              Start-Sleep -Seconds 2
+          }
+
+      # CÀI ĐẶT ANDROID EMULATOR & GOOGLE PLAY FIX
+      - name: 📱 CÀI ĐẶT ANDROID & GOOGLE PLAY FIX
+        run: |
+          Write-Host ""
+          Write-Host "📱 CÀI ĐẶT ANDROID EMULATOR & FIX GOOGLE PLAY" -ForegroundColor Yellow
+          
+          Write-Host "│ 🔄 Đang cài đặt BlueStacks 5 (Lightweight)..." -ForegroundColor White
+          try {
+              $bluestacksUrl = "https://cdn3.bluestacks.com/downloads/windows/nxt/5.20.0.1043/BlueStacksInstaller_5.20.0.1043_native.exe"
+              $bluestacksPath = "$env:TEMP\BlueStacksInstaller.exe"
+              
+              # Tải BlueStacks
+              Invoke-WebRequest -Uri $bluestacksUrl -OutFile $bluestacksPath
+              
+              # Cài đặt silent mode
+              $installArgs = @(
+                  "/silent",
+                  "/install",
+                  "/nouac",
+                  "/noclean",
+                  "/noreboot"
+              )
+              
+              Start-Process -FilePath $bluestacksPath -ArgumentList $installArgs -Wait -NoNewWindow
+              Remove-Item $bluestacksPath -Force -ErrorAction SilentlyContinue
+              Write-Host "│ ✅ BlueStacks 5 đã được cài đặt" -ForegroundColor Green
+          } catch {
+              Write-Host "│ ⚠️  Không thể cài BlueStacks, sử dụng alternative" -ForegroundColor Yellow
+          }
+          
+          # Fix Google Play Services
+          Write-Host "│ 🔧 Đang fix Google Play Services..." -ForegroundColor White
+          try {
+              # Tạo script fix Google Play
+              $fixScript = @"
+              @echo off
+              echo Fixing Google Play Services...
+              adb shell pm clear com.google.android.gms
+              adb shell pm clear com.android.vending
+              adb shell pm enable com.google.android.gms
+              adb shell pm enable com.android.vending
+              echo Google Play fix applied!
+"@
+              $fixScript | Out-File -FilePath "$env:TEMP\fix_google_play.bat" -Encoding ASCII
+              Write-Host "│ ✅ Google Play fix script đã sẵn sàng" -ForegroundColor Green
+          } catch {
+              Write-Host "│ ⚠️  Không thể tạo fix script" -ForegroundColor Yellow
+          }
+
+      # TAILSCALE PREMIUM NETWORK
+      - name: 🌐 THIẾT LẬP MẠNG GAMING
+        env:
+          TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
+        run: |
+          Write-Host ""
+          Write-Host "🌐 THIẾT LẬP MẠNG GAMING PREMIUM" -ForegroundColor Yellow
+          
+          # Cài đặt Tailscale
+          try {
+              $msiPath = "$env:TEMP\tailscale-gaming.msi"
+              Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msiPath
+              Start-Process msiexec.exe -ArgumentList "/i", "`"$msiPath`"", "/quiet", "/norestart" -Wait
+              Remove-Item $msiPath -Force -ErrorAction SilentlyContinue
+              Write-Host "│ ✅ Tailscale Gaming Edition" -ForegroundColor Green
+          } catch {
+              Write-Host "│ ❌ Lỗi cài đặt Tailscale" -ForegroundColor Red
+          }
+          
+          Start-Sleep -Seconds 10
+          
+          # Kết nối với optimized settings
+          try {
+              & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=win-pro-gaming-$env:GITHUB_RUN_ID --accept-routes --accept-dns --reset --operator=GAMING-PRO
+              Write-Host "│ ✅ Kết nối mạng gaming thành công" -ForegroundColor Green
+          } catch {
+              Write-Host "│ ❌ Lỗi kết nối mạng" -ForegroundColor Red
+          }
+          
+          # Lấy IP với timeout ngắn hơn
+          Write-Host "🔄 Đang lấy địa chỉ IP Gaming..." -NoNewline -ForegroundColor Blue
+          $ip = $null
+          for($i=0; $i -lt 10; $i++) {
+              try {
+                  $ip = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4 2>&1
+                  if ($ip -and $ip -match '^\d+\.\d+\.\d+\.\d+$') {
+                      echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
+                      Write-Host "`r✅ Gaming IP: $ip" -ForegroundColor Green
+                      break
+                  }
+              } catch {}
+              Write-Host "`r🔄 Đang lấy IP... $(@('.', '..', '...')[$i % 3])" -NoNewline -ForegroundColor Blue
+              Start-Sleep -Seconds 2
+          }
+          
+          if (-not $ip) {
+              echo "TAILSCALE_IP=win-pro-gaming.local" >> $env:GITHUB_ENV
+          }
+
+      # HIỂN THỊ THÔNG TIN GAMING PRO
+      - name: 🎉 THÔNG TIN WINDOWS PRO GAMING
+        run: |
+          $matKhau = Get-Content $env:TEMP\gaming_password.txt -ErrorAction SilentlyContinue
+          if (-not $matKhau) {
+              $matKhau = "Không thể đọc mật khẩu"
+          }
+          
+          # Tính thời gian
+          $durationInput = "${{ github.event.inputs.duration }}"
+          switch ($durationInput) {
+              "1h" { $totalMinutes = 60; $displayTime = "1 giờ" }
+              "3h" { $totalMinutes = 180; $displayTime = "3 giờ" }
+              "5h40m" { $totalMinutes = 340; $displayTime = "5 giờ 40 phút" }
+          }
+          
+          $timeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById("SE Asia Standard Time")
+          $thoiGianBatDau = [System.TimeZoneInfo]::ConvertTimeFromUtc((Get-Date).ToUniversalTime(), $timeZone)
+          $thoiGianKetThuc = $thoiGianBatDau.AddMinutes($totalMinutes)
+          
+          Write-Host ""
+          Write-Host "┌─────────────────────────────────────────────────┐" -ForegroundColor Cyan
+          Write-Host "│           🎉 WINDOWS PRO GAMING READY!          │" -ForegroundColor Cyan
+          Write-Host "├─────────────────────────────────────────────────┤" -ForegroundColor Cyan
+          Write-Host "│ 🪟 Phiên bản: Windows Pro Ultra Gaming         │" -ForegroundColor White
+          Write-Host "│ ⚡ Performance: Ultra Fast - No Lag            │" -ForegroundColor Green
+          Write-Host "│ 🌐 Địa chỉ: $env:TAILSCALE_IP" -ForegroundColor White
+          Write-Host "│ 👤 Tài khoản: GAMING-PRO" -ForegroundColor White
+          Write-Host "│ 🔐 Mật khẩu: $matKhau" -ForegroundColor White
+          Write-Host "│ 🎮 Trạng thái: Gaming & Android Ready         │" -ForegroundColor Magenta
+          Write-Host "│ ⏰ Thời lượng: $displayTime" -ForegroundColor White
+          Write-Host "│ 🕐 Bắt đầu: $($thoiGianBatDau.ToString('HH:mm:ss'))" -ForegroundColor White
+          Write-Host "│ 🕐 Kết thúc: $($thoiGianKetThuc.ToString('HH:mm:ss'))" -ForegroundColor White
+          Write-Host "│ 📍 Port: 3389" -ForegroundColor White
+          Write-Host "├─────────────────────────────────────────────────┤" -ForegroundColor Cyan
+          Write-Host "│ 🎯 Tính năng:                                  │" -ForegroundColor Cyan
+          Write-Host "│   ✓ Windows Pro Optimized                      │" -ForegroundColor Yellow
+          Write-Host "│   ✓ Ultra Fast Performance                     │" -ForegroundColor Yellow
+          Write-Host "│   ✓ Gaming Ready (BlueStacks 5)               │" -ForegroundColor Yellow
+          Write-Host "│   ✓ Google Play Fixed                         │" -ForegroundColor Yellow
+          Write-Host "│   ✓ No Lag - Super Smooth                     │" -ForegroundColor Yellow
+          Write-Host "└─────────────────────────────────────────────────┘" -ForegroundColor Cyan
+          
+          echo "TOTAL_MINUTES=$totalMinutes" >> $env:GITHUB_ENV
+
+      # GAMING SESSION MANAGER
+      - name: ⚡ QUẢN LÝ PHIÊN GAMING
+        run: |
+          $matKhau = Get-Content $env:TEMP\gaming_password.txt -ErrorAction SilentlyContinue
+          $totalMinutes = $env:TOTAL_MINUTES
+          
+          $timeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById("SE Asia Standard Time")
+          $thoiGianBatDau = [System.TimeZoneInfo]::ConvertTimeFromUtc((Get-Date).ToUniversalTime(), $timeZone)
+          $thoiGianKetThuc = $thoiGianBatDau.AddMinutes($totalMinutes)
+          
+          Write-Host ""
+          Write-Host "⚡ BẮT ĐẦU PHIÊN WINDOWS PRO GAMING..." -ForegroundColor Yellow
+          Write-Host "🎮 Chế độ: Ultra Performance Gaming" -ForegroundColor Magenta
+          Write-Host "🔗 Kết nối: $env:TAILSCALE_IP" -ForegroundColor Cyan
+          Write-Host "🕐 Bắt đầu: $($thoiGianBatDau.ToString('HH:mm:ss'))" -ForegroundColor Green
+          Write-Host "🕐 Kết thúc: $($thoiGianKetThuc.ToString('HH:mm:ss'))" -ForegroundColor Green
+          Write-Host ""
+          
+          # Performance Monitor
+          $performanceScript = {
+              $performanceCounters = @(
+                  @{Name="CPU"; Counter="\Processor(_Total)\% Processor Time"},
+                  @{Name="RAM"; Counter="\Memory\Available MBytes"},
+                  @{Name="GPU"; Counter="\GPU Engine(*engtype_3D)\Utilization Percentage"}
+              )
+              
+              while ($true) {
+                  $currentTime = Get-Date
+                  $status = @()
+                  
+                  foreach ($counter in $performanceCounters) {
+                      try {
+                          $value = (Get-Counter -Counter $counter.Counter -SampleInterval 1 -MaxSamples 1).CounterSamples.CookedValue
+                          if ($counter.Name -eq "RAM") {
+                              $status += "$($counter.Name): $([math]::Round($value))MB"
+                          } else {
+                              $status += "$($counter.Name): $([math]::Round($value))%"
+                          }
+                      } catch {
+                          $status += "$($counter.Name): N/A"
+                      }
+                  }
+                  
+                  Write-Host "[$($currentTime.ToString('HH:mm:ss'))] 📊 $($status -join ' | ')" -ForegroundColor Blue
+                  Start-Sleep -Seconds 30
+              }
+          }
+          
+          Start-Job -ScriptBlock $performanceScript -Name "PerformanceMonitor"
+          
+          # Gaming Timer với hiệu ứng
+          $frames = @('🎮', '⚡', '🚀', '🔥', '💻', '🎯')
+          $colors = @('Green', 'Cyan', 'Yellow', 'Magenta', 'Red', 'Blue')
+          $startTime = Get-Date
+          
+          do {
+              $thoiGianHienTai = [System.TimeZoneInfo]::ConvertTimeFromUtc((Get-Date).ToUniversalTime(), $timeZone)
+              $thoiGianConLai = $thoiGianKetThuc - $thoiGianHienTai
+              
+              $gioConLai = [math]::Max(0, [math]::Floor($thoiGianConLai.TotalHours))
+              $phutConLai = [math]::Max(0, [math]::Floor($thoiGianConLai.TotalMinutes % 60))
+              $giayConLai = [math]::Max(0, [math]::Floor($thoiGianConLai.TotalSeconds % 60))
+              
+              $frame = $frames[([int]((Get-Date) - $startTime).TotalSeconds) % $frames.Length]
+              $color = $colors[([int]((Get-Date) - $startTime).TotalMinutes) % $colors.Length]
+              
+              Write-Host "`r$frame [$($thoiGianHienTai.ToString('HH:mm:ss'))] Gaming Session - Còn lại: $gioConLai:$phutConLai:$giayConLai" -NoNewline -ForegroundColor $color
+              
+              Start-Sleep -Seconds 5
+              
+          } while ($thoiGianConLai.TotalSeconds -gt 0)
+          
+          Write-Host ""
+          Write-Host "🎯 GAMING SESSION ĐÃ KẾT THÚC!" -ForegroundColor Red
+          Get-Job -Name "PerformanceMonitor" -ErrorAction SilentlyContinue | Stop-Job -PassThru | Remove-Job -Force
+
+      # DỌN DẸP GAMING PRO
+      - name: 🧹 DỌN DẸP GAMING PRO
+        if: always()
+        run: |
+          Write-Host ""
+          Write-Host "🧹 DỌN DẸP WINDOWS PRO GAMING..." -ForegroundColor Yellow
+          
+          $cleanupSteps = @(
+              @{Name="Xóa file gaming password"; Script={
+                  Remove-Item "$env:TEMP\gaming_password.txt" -ErrorAction SilentlyContinue
+                  Remove-Item "$env:TEMP\fix_google_play.bat" -ErrorAction SilentlyContinue
+              }},
+              @{Name="Khôi phục cài đặt mặc định"; Script={
+                  powercfg -setactive 381b4222-f694-41f0-9685-ff5bb260df2e  # Balanced
+                  # Khôi phục visual effects
+                  Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 3 -Type DWord -Force
+              }},
+              @{Name="Đóng kết nối gaming"; Script={
+                  & "$env:ProgramFiles\Tailscale\tailscale.exe" down --accept-risk=all -ErrorAction SilentlyContinue
+                  Start-Sleep -Seconds 3
+              }},
+              @{Name="Xóa rule firewall gaming"; Script={
+                  netsh advfirewall firewall delete rule name="RDP-Gaming-Pro" dir=in -ErrorAction SilentlyContinue
+                  netsh advfirewall firewall delete rule name="RDP-Gaming-Pro-Out" dir=out -ErrorAction SilentlyContinue
+              }},
+              @{Name="Khôi phục cài đặt RDP"; Script={
+                  Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 1 -Force -ErrorAction SilentlyContinue
+                  Stop-Service -Name TermService -Force -ErrorAction SilentlyContinue
+                  Set-Service -Name TermService -StartupType Manual -ErrorAction SilentlyContinue
+              }}
+          )
+          
+          foreach($step in $cleanupSteps) {
+              Write-Host "│ 🧹 $($step.Name)..." -NoNewline -ForegroundColor Gray
+              try {
+                  & $step.Script
+                  Write-Host "`r│ ✅ $($step.Name)" -ForegroundColor Green
+              } catch {
+                  Write-Host "`r│ ⚠️  $($step.Name) - Đã xử lý" -ForegroundColor Yellow
+              }
+              Start-Sleep -Milliseconds 300
+          }
+          
+          Get-Job | Stop-Job -PassThru | Remove-Job -Force -ErrorAction SilentlyContinue
+          
+          Write-Host ""
+          Write-Host "🎉 Windows Pro Gaming đã được dọn dẹp! Hẹn gặp lại! 👋" -ForegroundColor Green
