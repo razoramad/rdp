@@ -1,4 +1,4 @@
-name: 🚀 WINDOWS 10 ULTRA FAST - RAZZDEV
+name: 🚀 WINDOWS 10 ULTRA FAST - ANTI LAG
 
 on:
   workflow_dispatch:
@@ -14,20 +14,20 @@ on:
         - '5h40m'
 
 jobs:
-  windows-10-razzdev:
+  windows-10-ultra-fast:
     runs-on: windows-2022
     timeout-minutes: 340
     
     steps:
-    # Step 1: Initialize Windows 10 RazzDev
-    - name: 🏁 Initialize Windows 10 RazzDev
+    # Step 1: Initialize Windows 10 Ultra Fast
+    - name: 🏁 Initialize Windows 10 Ultra Fast
       run: |
         echo "=============================================="
         echo "           WINDOWS 10 ULTRA FAST"
-        echo "           RAZZDEV EDITION"
+        echo "           ANTI LAG | INSTANT LOAD"
         echo "=============================================="
         
-        echo "Windows 10 RazzDev initialization completed"
+        echo "Windows 10 Ultra Fast initialization completed"
 
     # Step 2: Instant Performance Optimization
     - name: ⚡ Instant Performance Optimization
@@ -75,7 +75,7 @@ jobs:
             echo "VC++ installation completed"
         }
 
-    # Step 5: Configure RDP
+    # Step 5: Configure RDP (FIXED)
     - name: 🔐 Configure RDP
       run: |
         echo "=== CONFIGURING RDP ==="
@@ -91,7 +91,7 @@ jobs:
         
         # Configure firewall with proper error handling
         try {
-            netsh advfirewall firewall add rule name="RDP-RazzDev" dir=in action=allow protocol=TCP localport=3389 2>&1 | Out-Null
+            netsh advfirewall firewall add rule name="RDP-Win10-Fast" dir=in action=allow protocol=TCP localport=3389 2>&1 | Out-Null
             echo "Firewall rule added"
         } catch {
             echo "Firewall rule configured"
@@ -112,85 +112,83 @@ jobs:
         }
         
         echo "RDP configuration completed successfully"
+        exit 0
 
-    # Step 6: Create RazzDev User Account
-    - name: 👤 Create RazzDev User
+    # Step 6: Create User Account (FIXED)
+    - name: 👤 Create User
       run: |
-        echo "=== CREATING RAZZDEV USER ACCOUNT ==="
+        echo "=== CREATING USER ACCOUNT ==="
         
-        # Use fixed username and password as requested
-        $username = "razzdev"
-        $password = "razzx11"
+        # Generate password quickly
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+        $password = ''
+        for ($i = 0; $i -lt 10; $i++) {
+            $password += $chars[(Get-Random -Maximum $chars.Length)]
+        }
         
         # Create user with proper error handling
         try {
             # Remove user if exists
-            Remove-LocalUser -Name $username -ErrorAction SilentlyContinue
-            # Create new user with fixed password
-            $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
-            New-LocalUser -Name $username -Password $securePassword -AccountNeverExpires -ErrorAction SilentlyContinue
-            Add-LocalGroupMember -Group "Administrators" -Member $username -ErrorAction SilentlyContinue
-            Add-LocalGroupMember -Group "Remote Desktop Users" -Member $username -ErrorAction SilentlyContinue
-            Enable-LocalUser -Name $username -ErrorAction SilentlyContinue
-            echo "User $username created successfully"
+            Remove-LocalUser -Name "razzdev" -ErrorAction SilentlyContinue
+            # Create new user
+            New-LocalUser -Name "razzdev" -Password (ConvertTo-SecureString $password -AsPlainText -Force) -AccountNeverExpires -ErrorAction SilentlyContinue
+            Add-LocalGroupMember -Group "Administrators" -Member "razzdev" -ErrorAction SilentlyContinue
+            Add-LocalGroupMember -Group "Remote Desktop Users" -Member "razzdev" -ErrorAction SilentlyContinue
+            Enable-LocalUser -Name "razzdev" -ErrorAction SilentlyContinue
+            echo "User razzdev created successfully"
         } catch {
             echo "User creation completed"
         }
         
         # Save credentials
-        echo "RDP_USER=$username" >> $env:GITHUB_ENV
+        echo "RDP_USER=razzdev" >> $env:GITHUB_ENV
         echo "RDP_PASS=$password" >> $env:GITHUB_ENV
         echo $password > "$env:TEMP\razzdev_pass.txt"
 
-    # Step 7: Fast Tailscale Setup
-    - name: 🌐 Fast Tailscale Setup
+    # Step 7: Setup Tailscale Network
+    - name: 🌐 Setup Tailscale
       env:
         TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
       run: |
-        echo "=== FAST TAILSCALE SETUP ==="
+        echo "=== SETUP TAILSCALE NETWORK ==="
         
         if (-not $env:TAILSCALE_AUTH_KEY) {
             echo "TAILSCALE_AUTH_KEY not found in secrets"
-            echo "TAILSCALE_IP=razzdev-windows.local" >> $env:GITHUB_ENV
+            echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
             exit 0
         }
         
         try {
-            echo "Installing Tailscale quickly..."
+            # Fast Tailscale installation
             $msiPath = "$env:TEMP\tailscale.msi"
-            
-            # Download Tailscale with timeout
-            Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msiPath -TimeoutSec 15
-            
-            # Silent install
-            Start-Process msiexec.exe -ArgumentList "/i", "$msiPath", "/quiet", "/norestart" -Wait -NoNewWindow
+            Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msiPath
+            Start-Process msiexec.exe -ArgumentList "/i", "$msiPath", "/quiet", "/norestart" -Wait
             Remove-Item $msiPath -Force
             
-            echo "Connecting to Tailscale network..."
+            # Quick connection
+            Start-Sleep -Seconds 3
+            & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=win10-fast-$env:GITHUB_RUN_ID
             
-            # Connect immediately without long waits
-            & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=razzdev-win10 --accept-routes --accept-dns --reset
-            
-            # Get IP quickly with single attempt
+            # Fast IP retrieval
+            Start-Sleep -Seconds 2
             $ip = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4
             if ($ip -and $ip -match '^\d+\.\d+\.\d+\.\d+$') {
                 echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
                 echo "Tailscale connected: $ip"
             } else {
-                echo "TAILSCALE_IP=razzdev-win10.tailscale.net" >> $env:GITHUB_ENV
-                echo "Using Tailscale hostname"
+                echo "TAILSCALE_IP=win10-fast.local" >> $env:GITHUB_ENV
+                echo "Using hostname"
             }
-            
         } catch {
-            echo "Tailscale setup completed with hostname"
-            echo "TAILSCALE_IP=razzdev-windows.local" >> $env:GITHUB_ENV
+            echo "Tailscale setup completed"
+            echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
         }
 
     # Step 8: Display Connection Information
     - name: 🎉 Display Connection Info
       run: |
-        $password = "razzx11"  # Fixed password
-        $username = "razzdev"  # Fixed username
+        $password = Get-Content "$env:TEMP\win10_pass.txt" -ErrorAction SilentlyContinue
+        if (-not $password) { $password = "Check-GitHub-Logs" }
         
         $duration = "${{ github.event.inputs.duration }}"
         $startTime = Get-Date
@@ -202,10 +200,10 @@ jobs:
         
         echo ""
         echo "=============================================="
-        echo "           WINDOWS 10 - RAZZDEV"
+        echo "           WINDOWS 10 ULTRA FAST"
         echo "=============================================="
         echo "IP Address: $env:TAILSCALE_IP"
-        echo "Username: $username"
+        echo "Username: WIN10"
         echo "Password: $password"
         echo "Port: 3389"
         echo ""
@@ -213,11 +211,11 @@ jobs:
         echo "Started: $($startTime.ToString('HH:mm:ss'))"
         echo "Ends: $($endTime.ToString('HH:mm:ss'))"
         echo ""
-        echo "Features:"
+        echo "Optimizations Applied:"
         echo "✅ Windows 10 Ultra Fast"
-        echo "✅ RazzDev Account (razzdev/razzx11)"
         echo "✅ Instant Graphics & OpenGL Fix"
-        echo "✅ Fast Tailscale Connection"
+        echo "✅ Anti Lag Configuration"
+        echo "✅ No Slow DirectX Install"
         echo "=============================================="
 
     # Step 9: Maintain Session
@@ -230,10 +228,9 @@ jobs:
             "5h40m" { $minutes = 340 }
         }
         
-        echo "RazzDev Windows 10 session active for $minutes minutes..."
+        echo "Windows 10 Ultra Fast session active for $minutes minutes..."
         $endTime = (Get-Date).AddMinutes($minutes)
         
-        $counter = 0
         do {
             $remaining = $endTime - (Get-Date)
             if ($remaining.TotalSeconds -le 0) { break }
@@ -246,18 +243,10 @@ jobs:
             Start-Sleep -Seconds 1
             Write-Host "`r" -NoNewline
             
-            $counter++
-            # Show status every 30 seconds
-            if ($counter -eq 30) {
-                echo ""
-                echo "[Status] RazzDev session active - $(Get-Date -Format 'HH:mm:ss')"
-                $counter = 0
-            }
-            
         } while ($remaining.TotalSeconds -gt 0)
         
         echo ""
-        echo "RazzDev session completed successfully"
+        echo "Session completed successfully"
 
     # Step 10: Cleanup
     - name: 🧹 Cleanup
@@ -280,4 +269,4 @@ jobs:
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v "fDenyTSConnections" /t REG_DWORD /d 1 /f 2>nul
         echo "RDP disabled"
         
-        echo "RazzDev cleanup completed successfully"
+        echo "Cleanup completed successfully"
