@@ -1,10 +1,10 @@
-name: 🚀 WINDOWS PRO SUPER FAST - NO ERRORS
+name: 🚀 WINDOWS PRO ULTIMATE
 
 on:
   workflow_dispatch:
     inputs:
       duration:
-        description: '🕐 Thời gian sử dụng'
+        description: '🕐 Duration'
         required: false
         default: '5h40m'
         type: choice
@@ -14,521 +14,208 @@ on:
         - '5h40m'
 
 jobs:
-  Windows-Pro-Super-Fast:
+  windows-pro:
     runs-on: windows-latest
     timeout-minutes: 340
     
     steps:
-    # STEP 1: REMOVE TEST MODE & INITIAL SETUP
-    - name: 🚀 KHỞI ĐỘNG WINDOWS PRO SUPER FAST
+    # Step 1: Initialize
+    - name: 🏁 Initialize Windows Pro
       run: |
-          Write-Host "==================================================" -ForegroundColor Cyan
-          Write-Host "            🚀 WINDOWS PRO SUPER FAST" -ForegroundColor Yellow
-          Write-Host "            ⚡ NO ERRORS - OPTIMIZED" -ForegroundColor Green
-          Write-Host "==================================================" -ForegroundColor Cyan
-          
-          # Remove Windows Test Mode completely
-          Write-Host "🔧 Removing Windows Test Mode..." -ForegroundColor White
-          try {
-              Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Policy" -Name "VerifiedAndReputablePolicyState" -ErrorAction SilentlyContinue
-              Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options" -Name "VerifiedAndReputablePolicyState" -ErrorAction SilentlyContinue
-              Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -ErrorAction SilentlyContinue
-              Write-Host "✅ Test Mode removed successfully" -ForegroundColor Green
-          } catch {
-              Write-Host "⚠️ Test Mode already removed" -ForegroundColor Yellow
-          }
-          
-          # Verify Windows Edition
-          $osInfo = Get-WmiObject -Class Win32_OperatingSystem
-          Write-Host "✅ Operating System: $($osInfo.Caption)" -ForegroundColor Green
-          Write-Host "✅ Architecture: $($env:PROCESSOR_ARCHITECTURE)" -ForegroundColor Green
+        echo "=============================================="
+        echo "           WINDOWS PRO ULTIMATE"
+        echo "=============================================="
+        
+        # Basic system info
+        systeminfo | findstr /C:"OS Name" /C:"OS Version"
+        echo "Initialization completed"
 
-    # STEP 2: SUPER FAST PERFORMANCE OPTIMIZATION
-    - name: ⚡ SUPER FAST PERFORMANCE OPTIMIZATION
+    # Step 2: Remove Test Mode
+    - name: 🚫 Remove Test Mode
       run: |
-          Write-Host "==================================================" -ForegroundColor Cyan
-          Write-Host "            ⚡ SUPER FAST OPTIMIZATION" -ForegroundColor Yellow
-          Write-Host "==================================================" -ForegroundColor Cyan
-          
-          $optimizations = @(
-              @{Name="Ultimate Performance Power Plan"; Script={
-                  powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
-                  powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61
-              }},
-              @{Name="Disable All Visual Effects"; Script={
-                  Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -Type DWord -Force
-                  Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Value "0" -Force
-                  Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "MenuShowDelay" -Value "0" -Force
-              }},
-              @{Name="Optimize Memory & CPU"; Script={
-                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "ClearPageFileAtShutdown" -Value 0 -Type DWord -Force
-                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "LargeSystemCache" -Value 1 -Type DWord -Force
-                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl" -Name "Win32PrioritySeparation" -Value 38 -Type DWord -Force
-              }},
-              @{Name="Gaming Network Optimization"; Script={
-                  Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "NetworkThrottlingIndex" -Value 4294967295 -Type DWord -Force
-                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "TcpAckFrequency" -Value 1 -Type DWord -Force
-                  Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "TCPNoDelay" -Value 1 -Type DWord -Force
-              }},
-              @{Name="Disable Unnecessary Services"; Script={
-                  $services = @("DiagTrack", "WSearch", "TabletInputService", "XboxGipSvc", "XboxNetApiSvc")
-                  foreach ($service in $services) {
-                      Set-Service -Name $service -StartupType Disabled -ErrorAction SilentlyContinue
-                      Stop-Service -Name $service -Force -ErrorAction SilentlyContinue
-                  }
-              }}
-          )
-          
-          foreach ($opt in $optimizations) {
-              Write-Host "🔧 $($opt.Name)..." -NoNewline -ForegroundColor Yellow
-              try {
-                  & $opt.Script
-                  Write-Host "`r✅ $($opt.Name)" -ForegroundColor Green
-              } catch {
-                  Write-Host "`r⚠️ $($opt.Name) - Optimized" -ForegroundColor Yellow
-              }
-              Start-Sleep -Milliseconds 300
-          }
+        echo "=== REMOVING TEST MODE ==="
+        reg delete "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" /v "VerifiedAndReputablePolicyState" /f 2>nul || echo "Test mode already removed"
+        echo "Test mode removal completed"
 
-    # STEP 3: INSTALL GRAPHICS & GAMING FRAMEWORK
-    - name: 🎮 INSTALL GRAPHICS & GAMING FRAMEWORK
+    # Step 3: Performance Optimization
+    - name: ⚡ Performance Optimization
       run: |
-          Write-Host "==================================================" -ForegroundColor Cyan
-          Write-Host "            🎮 GRAPHICS & GAMING SETUP" -ForegroundColor Yellow
-          Write-Host "==================================================" -ForegroundColor Cyan
-          
-          $runtimes = @(
-              @{Name="Visual C++ Redistributable"; Url="https://aka.ms/vs/17/release/vc_redist.x64.exe"},
-              @{Name=".NET Framework 4.8"; Url="https://go.microsoft.com/fwlink/?linkid=2088631"},
-              @{Name="DirectX Runtime"; Url="https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe"}
-          )
-          
-          foreach ($runtime in $runtimes) {
-              Write-Host "📦 Installing $($runtime.Name)..." -NoNewline -ForegroundColor White
-              try {
-                  $tempFile = "$env:TEMP\$($runtime.Name.Replace(' ', '_')).exe"
-                  Invoke-WebRequest -Uri $runtime.Url -OutFile $tempFile
-                  
-                  if ($runtime.Name -eq "DirectX Runtime") {
-                      Start-Process -FilePath $tempFile -ArgumentList "/Q" -Wait -NoNewWindow
-                  } else {
-                      Start-Process -FilePath $tempFile -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
-                  }
-                  
-                  Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
-                  Write-Host "`r✅ $($runtime.Name) installed" -ForegroundColor Green
-              } catch {
-                  Write-Host "`r⚠️ $($runtime.Name) - Already installed" -ForegroundColor Yellow
-              }
-              Start-Sleep -Seconds 2
-          }
+        echo "=== PERFORMANCE OPTIMIZATION ==="
+        
+        # Power plan
+        powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+        echo "High performance power plan activated"
+        
+        # Basic optimizations
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v "VisualFXSetting" /t REG_DWORD /d 2 /f
+        echo "Performance optimization completed"
 
-    # STEP 4: FIXED GOOGLE PLAY PC INSTALLATION
-    - name: 📱 GOOGLE PLAY PC - FIXED INSTALLATION
+    # Step 4: Install Runtimes
+    - name: 📦 Install Runtimes
       run: |
-          Write-Host "==================================================" -ForegroundColor Cyan
-          Write-Host "            📱 GOOGLE PLAY PC - NO ERRORS" -ForegroundColor Yellow
-          WriteHost "==================================================" -ForegroundColor Cyan
-          
-          # Method 1: Install Google Play Games PC (Official)
-          Write-Host "🔧 Method 1: Installing Google Play Games PC..." -ForegroundColor White
-          try {
-              $gpUrl = "https://dl.google.com/playgames/pcg/installer/GooglePlayGamesSetup.exe"
-              $gpPath = "$env:TEMP\GooglePlayGamesSetup.exe"
-              
-              Invoke-WebRequest -Uri $gpUrl -OutFile $gpPath
-              Start-Process -FilePath $gpPath -ArgumentList "--silent" -Wait -NoNewWindow
-              Start-Sleep -Seconds 10
-              
-              # Kill process if stuck
-              Get-Process -Name "GooglePlayGamesSetup" -ErrorAction SilentlyContinue | Stop-Process -Force
-              Get-Process -Name "Google Play Games" -ErrorAction SilentlyContinue | Stop-Process -Force
-              
-              Remove-Item $gpPath -Force -ErrorAction SilentlyContinue
-              Write-Host "✅ Google Play Games PC installed" -ForegroundColor Green
-          } catch {
-              Write-Host "⚠️ Google Play Games installation had issues" -ForegroundColor Yellow
-          }
-          
-          # Method 2: Install BlueStacks 5 with Google Play
-          Write-Host "🔧 Method 2: Installing BlueStacks 5 with Google Play..." -ForegroundColor White
-          try {
-              $bluestacksUrl = "https://cdn3.bluestacks.com/downloads/windows/nxt/5.20.0.1043/BlueStacksInstaller_5.20.0.1043_native.exe"
-              $bluestacksPath = "$env:TEMP\BlueStacksInstaller.exe"
-              
-              Invoke-WebRequest -Uri $bluestacksUrl -OutFile $bluestacksPath
-              
-              # Silent installation parameters for BlueStacks
-              $installArgs = @(
-                  "/silent",
-                  "/install",
-                  "/nouac",
-                  "/noclean"
-              )
-              
-              Start-Process -FilePath $bluestacksPath -ArgumentList $installArgs -Wait -NoNewWindow
-              Start-Sleep -Seconds 30
-              
-              # Cleanup installer
-              Remove-Item $bluestacksPath -Force -ErrorAction SilentlyContinue
-              Write-Host "✅ BlueStacks 5 installed with Google Play" -ForegroundColor Green
-          } catch {
-              Write-Host "⚠️ BlueStacks installation had issues" -ForegroundColor Yellow
-          }
-          
-          # Create Google Play Fix Script
-          Write-Host "🔧 Creating Google Play Fix Script..." -ForegroundColor White
-          try {
-              $fixScript = @'
-@echo off
-echo 🔧 Fixing Google Play Services...
-timeout 5
+        echo "=== INSTALLING RUNTIMES ==="
+        
+        # Download and install VC++ Redist
+        $vcUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
+        $vcPath = "$env:TEMP\vc_redist.exe"
+        try {
+            Invoke-WebRequest -Uri $vcUrl -OutFile $vcPath
+            Start-Process -FilePath $vcPath -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
+            Remove-Item $vcPath -Force
+            echo "Visual C++ Runtime installed"
+        } catch {
+            echo "VC++ installation skipped"
+        }
 
-:: Fix common Google Play errors
-echo Resetting Google Play Services...
-adb shell pm clear com.google.android.gms
-adb shell pm clear com.android.vending
-adb shell pm enable com.google.android.gms
-adb shell pm enable com.android.vending
-
-:: Fix graphics issues
-echo Fixing graphics compatibility...
-adb shell settings put global enable_gpu_debug_layers 0
-adb shell settings put global game_driver_all_apps 1
-
-:: Clear app caches
-echo Clearing application caches...
-adb shell pm clear com.bluestacks.appmart
-adb shell pm clear com.bluestacks.bstfolder
-
-echo ✅ Google Play fixes applied successfully!
-echo Please restart BlueStacks for changes to take effect.
-pause
-'@
-              $fixScript | Out-File -FilePath "$env:TEMP\FixGooglePlay.bat" -Encoding ASCII
-              Write-Host "✅ Google Play fix script created at: $env:TEMP\FixGooglePlay.bat" -ForegroundColor Green
-          } catch {
-              Write-Host "⚠️ Could not create fix script" -ForegroundColor Yellow
-          }
-
-    # STEP 5: FIX OPENGL & GRAPHICS DRIVERS
-    - name: 🖥️ FIX OPENGL & GRAPHICS DRIVERS
+    # Step 5: Configure RDP
+    - name: 🔐 Configure RDP
       run: |
-          Write-Host "==================================================" -ForegroundColor Cyan
-          Write-Host "            🖥️ GRAPHICS DRIVERS FIX" -ForegroundColor Yellow
-          Write-Host "==================================================" -ForegroundColor Cyan
-          
-          Write-Host "🔧 Installing OpenGL compatibility..." -ForegroundColor White
-          try {
-              # Create OpenGL compatibility registry entries
-              $openglPaths = @(
-                  "HKLM:\SOFTWARE\Khronos\OpenGL",
-                  "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGL"
-              )
-              
-              foreach ($path in $openglPaths) {
-                  if (-not (Test-Path $path)) {
-                      New-Item -Path $path -Force -ErrorAction SilentlyContinue
-                  }
-              }
-              
-              Set-ItemProperty -Path "HKLM:\SOFTWARE\Khronos\OpenGL" -Name "Installable" -Value 1 -Type DWord -Force
-              Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGL" -Name "Version" -Value "1.0" -Force
-              
-              Write-Host "✅ OpenGL compatibility configured" -ForegroundColor Green
-          } catch {
-              Write-Host "⚠️ OpenGL configuration had minor issues" -ForegroundColor Yellow
-          }
-          
-          # Install basic graphics drivers
-          Write-Host "🔧 Setting up graphics optimization..." -ForegroundColor White
-          try {
-              Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "GPU Priority" -Value 8 -Type DWord -Force
-              Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "Priority" -Value 6 -Type DWord -Force
-              
-              Write-Host "✅ Graphics optimization completed" -ForegroundColor Green
-          } catch {
-              Write-Host "⚠️ Graphics optimization had minor issues" -ForegroundColor Yellow
-          }
+        echo "=== CONFIGURING RDP ==="
+        
+        # Enable RDP
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v "fDenyTSConnections" /t REG_DWORD /d 0 /f
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v "UserAuthentication" /t REG_DWORD /d 0 /f
+        
+        # Configure firewall
+        netsh advfirewall firewall add rule name="RDP-Windows-Pro" dir=in action=allow protocol=TCP localport=3389
+        
+        # Start service
+        sc config TermService start= auto
+        net start TermService
+        
+        echo "RDP configuration completed"
 
-    # STEP 6: CONFIGURE WINDOWS PRO RDP
-    - name: 🔐 CONFIGURE WINDOWS PRO RDP
+    # Step 6: Create User Account
+    - name: 👤 Create User
       run: |
-          Write-Host "==================================================" -ForegroundColor Cyan
-          Write-Host "            🔐 WINDOWS PRO RDP SETUP" -ForegroundColor Yellow
-          Write-Host "==================================================" -ForegroundColor Cyan
-          
-          $rdpConfig = @(
-              @{Name="Enable Remote Desktop"; Script={
-                  Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0 -Force
-                  Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0 -Force
-              }},
-              @{Name="Configure High Quality RDP"; Script={
-                  Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "MaxMonitors" -Value 4 -Force
-                  Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "MaxXResolution" -Value 3840 -Force
-                  Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "MaxYResolution" -Value 2160 -Force
-              }},
-              @{Name="Configure RDP Firewall Rules"; Script={
-                  netsh advfirewall firewall add rule name="RDP-Windows-Pro" dir=in action=allow protocol=TCP localport=3389
-                  netsh advfirewall firewall add rule name="RDP-Windows-Pro-Out" dir=out action=allow protocol=TCP localport=3389
-              }},
-              @{Name="Start RDP Services"; Script={
-                  Set-Service -Name TermService -StartupType Automatic
-                  Start-Service -Name TermService -ErrorAction SilentlyContinue
-              }}
-          )
-          
-          foreach ($config in $rdpConfig) {
-              Write-Host "🔧 $($config.Name)..." -NoNewline -ForegroundColor White
-              try {
-                  & $config.Script
-                  Write-Host "`r✅ $($config.Name)" -ForegroundColor Green
-              } catch {
-                  Write-Host "`r⚠️ $($config.Name) - Configured" -ForegroundColor Yellow
-              }
-              Start-Sleep -Milliseconds 500
-          }
+        echo "=== CREATING USER ==="
+        
+        # Generate password
+        Add-Type -AssemblyName System.Web
+        $password = [System.Web.Security.Membership]::GeneratePassword(12, 3)
+        
+        # Create user
+        net user WINPRO $password /add /y /expires:never
+        net localgroup administrators WINPRO /add
+        net localgroup "Remote Desktop Users" WINPRO /add
+        
+        # Save credentials
+        echo "RDP_USER=WINPRO" >> $env:GITHUB_ENV
+        echo "RDP_PASS=$password" >> $env:GITHUB_ENV
+        echo $password > $env:TEMP\winpro_pass.txt
+        
+        echo "User WINPRO created successfully"
 
-    # STEP 7: CREATE WINDOWS PRO USER
-    - name: 👤 CREATE WINDOWS PRO USER
-      run: |
-          Write-Host "==================================================" -ForegroundColor Cyan
-          Write-Host "            👤 WINDOWS PRO USER SETUP" -ForegroundColor Yellow
-          Write-Host "==================================================" -ForegroundColor Cyan
-          
-          try {
-              # Generate secure password
-              function New-SecurePassword {
-                  $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%'
-                  return -join ((1..12) | ForEach-Object { $chars[(Get-Random -Maximum $chars.Length)] })
-              }
-              
-              $password = New-SecurePassword
-              $securePass = ConvertTo-SecureString $password -AsPlainText -Force
-              
-              # Remove existing user if any
-              Remove-LocalUser -Name "WINPRO" -ErrorAction SilentlyContinue
-              
-              # Create new Windows Pro user
-              New-LocalUser -Name "WINPRO" -Password $securePass -AccountNeverExpires -Description "Windows Pro Super Fast User"
-              Set-LocalUser -Name "WINPRO" -PasswordNeverExpires $true
-              
-              # Add to necessary groups
-              Add-LocalGroupMember -Group "Administrators" -Member "WINPRO"
-              Add-LocalGroupMember -Group "Remote Desktop Users" -Member "WINPRO"
-              Add-LocalGroupMember -Group "Users" -Member "WINPRO"
-              
-              Enable-LocalUser -Name "WINPRO"
-              
-              # Save credentials securely
-              echo "RDP_USER=WINPRO" >> $env:GITHUB_ENV
-              echo "RDP_PASS=$password" >> $env:GITHUB_ENV
-              echo "$password" > $env:TEMP\winpro_password.txt
-              
-              Write-Host "✅ Windows Pro user 'WINPRO' created successfully" -ForegroundColor Green
-              Write-Host "🔐 Password has been generated and saved securely" -ForegroundColor Blue
-              
-          } catch {
-              Write-Host "❌ User creation failed: $($_.Exception.Message)" -ForegroundColor Red
-              exit 1
-          }
-
-    # STEP 8: SETUP TAILSCALE NETWORK
-    - name: 🌐 SETUP TAILSCALE NETWORK
+    # Step 7: Setup Tailscale
+    - name: 🌐 Setup Tailscale
       env:
         TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
       run: |
-          Write-Host "==================================================" -ForegroundColor Cyan
-          Write-Host "            🌐 NETWORK CONFIGURATION" -ForegroundColor Yellow
-          Write-Host "==================================================" -ForegroundColor Cyan
-          
-          if (-not $env:TAILSCALE_AUTH_KEY) {
-              Write-Host "❌ TAILSCALE_AUTH_KEY not found in secrets!" -ForegroundColor Red
-              Write-Host "💡 Please add your Tailscale auth key to repository secrets" -ForegroundColor Yellow
-              echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
-          } else {
-              try {
-                  Write-Host "📥 Installing Tailscale..." -ForegroundColor White
-                  $msiPath = "$env:TEMP\tailscale.msi"
-                  Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msiPath
-                  Start-Process msiexec.exe -ArgumentList "/i", "`"$msiPath`"", "/quiet", "/norestart" -Wait
-                  Remove-Item $msiPath -Force
-                  
-                  Write-Host "🔗 Connecting to Tailscale network..." -ForegroundColor White
-                  Start-Sleep -Seconds 10
-                  
-                  & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=windows-pro-sf-$env:GITHUB_RUN_ID --accept-routes --accept-dns --reset
-                  
-                  # Get IP address with retry logic
-                  Write-Host "🌐 Getting IP address..." -ForegroundColor White
-                  $ip = $null
-                  for ($i = 0; $i -lt 10; $i++) {
-                      Start-Sleep -Seconds 3
-                      $ip = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4 2>&1
-                      if ($ip -and $ip -match '^\d+\.\d+\.\d+\.\d+$') {
-                          echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
-                          Write-Host "✅ Tailscale connected - IP: $ip" -ForegroundColor Green
-                          break
-                      }
-                  }
-                  
-                  if (-not $ip -or $ip -notmatch '^\d+\.\d+\.\d+\.\d+$') {
-                      echo "TAILSCALE_IP=windows-pro-sf.local" >> $env:GITHUB_ENV
-                      Write-Host "⚠️ Using hostname: windows-pro-sf.local" -ForegroundColor Yellow
-                  }
-                  
-              } catch {
-                  Write-Host "❌ Tailscale setup failed: $($_.Exception.Message)" -ForegroundColor Red
-                  echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
-              }
-          }
+        echo "=== SETUP TAILSCALE ==="
+        
+        if (-not $env:TAILSCALE_AUTH_KEY) {
+            echo "TAILSCALE_AUTH_KEY not found in secrets"
+            echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
+            exit 0
+        }
+        
+        try {
+            # Download and install Tailscale
+            $msiPath = "$env:TEMP\tailscale.msi"
+            Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msiPath
+            Start-Process msiexec.exe -ArgumentList "/i", "$msiPath", "/quiet", "/norestart" -Wait
+            Remove-Item $msiPath -Force
+            
+            # Wait for installation
+            Start-Sleep -Seconds 10
+            
+            # Connect to Tailscale
+            & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=win-pro-$env:GITHUB_RUN_ID
+            
+            # Get IP
+            Start-Sleep -Seconds 5
+            $ip = & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+            if ($ip -and $ip -match '^\d+\.\d+\.\d+\.\d+$') {
+                echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
+                echo "Tailscale connected: $ip"
+            } else {
+                echo "TAILSCALE_IP=win-pro.local" >> $env:GITHUB_ENV
+                echo "Using hostname"
+            }
+        } catch {
+            echo "Tailscale setup failed"
+            echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
+        }
 
-    # STEP 9: DISPLAY CONNECTION INFORMATION
-    - name: 🎉 DISPLAY CONNECTION INFO
+    # Step 8: Display Info
+    - name: 🎉 Display Connection Info
       run: |
-          $password = Get-Content "$env:TEMP\winpro_password.txt" -ErrorAction SilentlyContinue
-          if (-not $password) { $password = "Check GitHub Secrets" }
-          
-          $duration = "${{ github.event.inputs.duration }}"
-          $startTime = Get-Date
-          switch ($duration) {
-              "1h" { $endTime = $startTime.AddHours(1); $displayTime = "1 hour" }
-              "3h" { $endTime = $startTime.AddHours(3); $displayTime = "3 hours" }
-              "5h40m" { $endTime = $startTime.AddHours(5).AddMinutes(40); $displayTime = "5 hours 40 minutes" }
-          }
-          
-          Write-Host ""
-          Write-Host "==================================================" -ForegroundColor Green
-          Write-Host "            🎉 WINDOWS PRO SUPER FAST" -ForegroundColor Yellow
-          Write-Host "            ⚡ READY TO CONNECT!" -ForegroundColor Green
-          Write-Host "==================================================" -ForegroundColor Green
-          Write-Host ""
-          Write-Host "🌐 CONNECTION DETAILS:" -ForegroundColor Cyan
-          Write-Host "   IP Address: $env:TAILSCALE_IP" -ForegroundColor White
-          Write-Host "   Username: WINPRO" -ForegroundColor White
-          Write-Host "   Password: $password" -ForegroundColor White
-          Write-Host "   Port: 3389" -ForegroundColor White
-          Write-Host ""
-          Write-Host "⏰ SESSION INFORMATION:" -ForegroundColor Cyan
-          Write-Host "   Duration: $displayTime" -ForegroundColor White
-          Write-Host "   Started: $($startTime.ToString('HH:mm:ss'))" -ForegroundColor White
-          Write-Host "   Ends: $($endTime.ToString('HH:mm:ss'))" -ForegroundColor White
-          Write-Host ""
-          Write-Host "🎮 INSTALLED SOFTWARE:" -ForegroundColor Cyan
-          Write-Host "   ✅ Google Play Games PC" -ForegroundColor White
-          Write-Host "   ✅ BlueStacks 5 with Google Play" -ForegroundColor White
-          Write-Host "   ✅ All Graphics Runtimes" -ForegroundColor White
-          Write-Host "   ✅ OpenGL Fixed" -ForegroundColor White
-          Write-Host ""
-          Write-Host "⚡ PERFORMANCE FEATURES:" -ForegroundColor Cyan
-          Write-Host "   ✅ Super Fast Optimization" -ForegroundColor White
-          Write-Host "   ✅ No Test Mode Watermark" -ForegroundColor White
-          Write-Host "   ✅ All Errors Fixed" -ForegroundColor White
-          Write-Host "   ✅ Windows Pro Environment" -ForegroundColor White
-          Write-Host ""
-          Write-Host "==================================================" -ForegroundColor Green
-          
-          # Save session end time for monitoring
-          $sessionInfo = @{
-              StartTime = $startTime
-              EndTime = $endTime
-              Duration = $duration
-          }
-          $sessionInfo | ConvertTo-Json | Out-File "$env:TEMP\session_info.json"
+        $password = Get-Content "$env:TEMP\winpro_pass.txt" -ErrorAction SilentlyContinue
+        if (-not $password) { $password = "Check logs" }
+        
+        $duration = "${{ github.event.inputs.duration }}"
+        $startTime = Get-Date
+        switch ($duration) {
+            "1h" { $endTime = $startTime.AddHours(1) }
+            "3h" { $endTime = $startTime.AddHours(3) }
+            "5h40m" { $endTime = $startTime.AddHours(5).AddMinutes(40) }
+        }
+        
+        echo ""
+        echo "=============================================="
+        echo "           CONNECTION INFORMATION"
+        echo "=============================================="
+        echo "IP Address: $env:TAILSCALE_IP"
+        echo "Username: WINPRO"
+        echo "Password: $password"
+        echo "Port: 3389"
+        echo ""
+        echo "Started: $($startTime.ToString('HH:mm:ss'))"
+        echo "Ends: $($endTime.ToString('HH:mm:ss'))"
+        echo "=============================================="
 
-    # STEP 10: MAINTAIN SESSION WITH MONITORING
-    - name: ⏳ MAINTAIN WINDOWS PRO SESSION
+    # Step 9: Maintain Session
+    - name: ⏳ Maintain Session
       run: |
-          $sessionInfo = Get-Content "$env:TEMP\session_info.json" | ConvertFrom-Json
-          $endTime = [DateTime]::Parse($sessionInfo.EndTime)
-          
-          Write-Host ""
-          Write-Host "🔵 WINDOWS PRO SUPER FAST SESSION ACTIVE" -ForegroundColor Cyan
-          Write-Host "⏰ Monitoring session until: $($endTime.ToString('HH:mm:ss'))" -ForegroundColor White
-          
-          # Performance monitoring in background
-          $monitorScript = {
-              while ($true) {
-                  $time = Get-Date
-                  try {
-                      $cpu = (Get-Counter "\Processor(_Total)\% Processor Time" -SampleInterval 1 -MaxSamples 1).CounterSamples.CookedValue
-                      $ram = (Get-Counter "\Memory\Available MBytes" -SampleInterval 1 -MaxSamples 1).CounterSamples.CookedValue
-                      Write-Host "[$($time.ToString('HH:mm:ss'))] 📊 CPU: $([math]::Round($cpu))% | RAM: $([math]::Round($ram))MB free" -ForegroundColor Blue
-                  } catch {
-                      Write-Host "[$($time.ToString('HH:mm:ss'))] 📊 System running..." -ForegroundColor Blue
-                  }
-                  Start-Sleep -Seconds 30
-              }
-          }
-          
-          Start-Job -ScriptBlock $monitorScript -Name "PerformanceMonitor"
-          
-          # Main session timer
-          $frames = @('🚀', '⚡', '🎮', '🖥️', '📱', '🔧')
-          $colors = @('Green', 'Cyan', 'Yellow', 'Magenta', 'Red', 'Blue')
-          
-          do {
-              $currentTime = Get-Date
-              $remaining = $endTime - $currentTime
-              
-              if ($remaining.TotalSeconds -le 0) { break }
-              
-              $hours = [math]::Max(0, [math]::Floor($remaining.TotalHours))
-              $minutes = [math]::Max(0, [math]::Floor($remaining.TotalMinutes % 60))
-              $seconds = [math]::Max(0, [math]::Floor($remaining.TotalSeconds % 60))
-              
-              $frameIndex = [int]($currentTime.Second % $frames.Length)
-              $colorIndex = [int]($currentTime.Minute % $colors.Length)
-              
-              Write-Host "`r$($frames[$frameIndex]) Windows Pro Session - Time left: $($hours.ToString('00')):$($minutes.ToString('00')):$($seconds.ToString('00'))" -NoNewline -ForegroundColor $colors[$colorIndex]
-              
-              Start-Sleep -Seconds 1
-              
-          } while ($remaining.TotalSeconds -gt 0)
-          
-          Write-Host ""
-          Write-Host "🔴 SESSION COMPLETED - Thank you for using Windows Pro Super Fast!" -ForegroundColor Red
-          
-          # Cleanup monitor job
-          Get-Job -Name "PerformanceMonitor" -ErrorAction SilentlyContinue | Stop-Job -PassThru | Remove-Job -Force
+        $duration = "${{ github.event.inputs.duration }}"
+        switch ($duration) {
+            "1h" { $minutes = 60 }
+            "3h" { $minutes = 180 }
+            "5h40m" { $minutes = 340 }
+        }
+        
+        echo "Session active for $minutes minutes..."
+        $endTime = (Get-Date).AddMinutes($minutes)
+        
+        do {
+            $remaining = $endTime - (Get-Date)
+            if ($remaining.TotalSeconds -le 0) { break }
+            
+            $hours = [math]::Floor($remaining.TotalHours)
+            $mins = [math]::Floor($remaining.TotalMinutes % 60)
+            $secs = [math]::Floor($remaining.TotalSeconds % 60)
+            
+            Write-Host "Time remaining: $($hours.ToString('00')):$($mins.ToString('00')):$($secs.ToString('00'))" -NoNewline
+            Start-Sleep -Seconds 1
+            Write-Host "`r" -NoNewline
+            
+        } while ($remaining.TotalSeconds -gt 0)
+        
+        echo "Session completed"
 
-    # STEP 11: CLEANUP SYSTEM
-    - name: 🧹 CLEANUP SYSTEM
+    # Step 10: Cleanup
+    - name: 🧹 Cleanup
       if: always()
       run: |
-          Write-Host ""
-          Write-Host "🧹 CLEANING UP WINDOWS PRO SYSTEM..." -ForegroundColor Cyan
-          
-          $cleanupTasks = @(
-              "Remove password file",
-              "Disconnect Tailscale",
-              "Remove firewall rules", 
-              "Disable RDP",
-              "Stop background jobs"
-          )
-          
-          foreach ($task in $cleanupTasks) {
-              Write-Host "🔧 $task..." -NoNewline -ForegroundColor Yellow
-              Start-Sleep -Milliseconds 300
-              Write-Host "`r✅ $task" -ForegroundColor Green
-          }
-          
-          # Actual cleanup commands
-          try {
-              Remove-Item "$env:TEMP\winpro_password.txt" -ErrorAction SilentlyContinue
-              Remove-Item "$env:TEMP\session_info.json" -ErrorAction SilentlyContinue
-              Remove-Item "$env:TEMP\FixGooglePlay.bat" -ErrorAction SilentlyContinue
-              
-              & "$env:ProgramFiles\Tailscale\tailscale.exe" down -ErrorAction SilentlyContinue
-              
-              netsh advfirewall firewall delete rule name="RDP-Windows-Pro" -ErrorAction SilentlyContinue
-              netsh advfirewall firewall delete rule name="RDP-Windows-Pro-Out" -ErrorAction SilentlyContinue
-              
-              Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 1 -Force -ErrorAction SilentlyContinue
-              
-              Get-Job | Stop-Job -PassThru | Remove-Job -Force -ErrorAction SilentlyContinue
-              
-              Write-Host "🎯 Windows Pro Super Fast cleanup completed!" -ForegroundColor Green
-          } catch {
-              Write-Host "⚠️ Cleanup had minor issues: $($_.Exception.Message)" -ForegroundColor Yellow
-          }
+        echo "=== CLEANUP ==="
+        
+        # Remove password file
+        Remove-Item "$env:TEMP\winpro_pass.txt" -ErrorAction SilentlyContinue
+        
+        # Disconnect Tailscale
+        & "C:\Program Files\Tailscale\tailscale.exe" down -ErrorAction SilentlyContinue
+        
+        # Disable RDP
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v "fDenyTSConnections" /t REG_DWORD /d 1 /f
+        
+        echo "Cleanup completed"
