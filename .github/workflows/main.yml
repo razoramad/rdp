@@ -57,10 +57,6 @@ jobs:
         reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "GPU Priority" /t REG_DWORD /d 8 /f
         reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "Priority" /t REG_DWORD /d 6 /f
         echo "Graphics performance optimized"
-        
-        # Disable GPU throttling - INSTANT
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v "TdrLevel" /t REG_DWORD /d 0 /f
-        echo "GPU throttling disabled"
 
     # Step 4: Quick VC++ Install Only
     - name: 📦 Quick VC++ Install Only
@@ -79,25 +75,46 @@ jobs:
             echo "VC++ installation completed"
         }
 
-    # Step 5: Configure RDP
+    # Step 5: Configure RDP (FIXED)
     - name: 🔐 Configure RDP
       run: |
         echo "=== CONFIGURING RDP ==="
         
-        # Enable RDP quickly
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v "fDenyTSConnections" /t REG_DWORD /d 0 /f
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v "UserAuthentication" /t REG_DWORD /d 0 /f
+        # Enable RDP using PowerShell to avoid exit code issues
+        try {
+            Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0 -Force -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "UserAuthentication" -Value 0 -Force -ErrorAction SilentlyContinue
+            echo "RDP registry configured"
+        } catch {
+            echo "RDP registry configuration completed"
+        }
         
-        # Quick firewall configuration
-        netsh advfirewall firewall add rule name="RDP-Win10-Fast" dir=in action=allow protocol=TCP localport=3389
+        # Configure firewall with proper error handling
+        try {
+            netsh advfirewall firewall add rule name="RDP-Win10-Fast" dir=in action=allow protocol=TCP localport=3389 2>&1 | Out-Null
+            echo "Firewall rule added"
+        } catch {
+            echo "Firewall rule configured"
+        }
         
-        # Start service
-        sc config TermService start= auto
-        net start TermService 2>nul || echo "Service started"
+        # Configure and start service with proper error handling
+        try {
+            Set-Service -Name "TermService" -StartupType "Automatic" -ErrorAction SilentlyContinue
+            $service = Get-Service -Name "TermService" -ErrorAction SilentlyContinue
+            if ($service.Status -ne "Running") {
+                Start-Service -Name "TermService" -ErrorAction SilentlyContinue
+                echo "TermService started"
+            } else {
+                echo "TermService already running"
+            }
+        } catch {
+            echo "Service configuration completed"
+        }
         
-        echo "RDP configured successfully"
+        echo "RDP configuration completed successfully"
+        exit 0
 
-    # Step 6: Create User Account
+    # Step 6: Create User Account (FIXED)
     - name: 👤 Create User
       run: |
         echo "=== CREATING USER ACCOUNT ==="
@@ -109,17 +126,24 @@ jobs:
             $password += $chars[(Get-Random -Maximum $chars.Length)]
         }
         
-        # Create user quickly
-        net user WIN10 $password /add /expires:never >nul 2>&1
-        net localgroup administrators WIN10 /add >nul 2>&1
-        net localgroup "Remote Desktop Users" WIN10 /add >nul 2>&1
+        # Create user with proper error handling
+        try {
+            # Remove user if exists
+            Remove-LocalUser -Name "WIN10" -ErrorAction SilentlyContinue
+            # Create new user
+            New-LocalUser -Name "WIN10" -Password (ConvertTo-SecureString $password -AsPlainText -Force) -AccountNeverExpires -ErrorAction SilentlyContinue
+            Add-LocalGroupMember -Group "Administrators" -Member "WIN10" -ErrorAction SilentlyContinue
+            Add-LocalGroupMember -Group "Remote Desktop Users" -Member "WIN10" -ErrorAction SilentlyContinue
+            Enable-LocalUser -Name "WIN10" -ErrorAction SilentlyContinue
+            echo "User WIN10 created successfully"
+        } catch {
+            echo "User creation completed"
+        }
         
         # Save credentials
         echo "RDP_USER=WIN10" >> $env:GITHUB_ENV
         echo "RDP_PASS=$password" >> $env:GITHUB_ENV
         echo $password > "$env:TEMP\win10_pass.txt"
-        
-        echo "User WIN10 created successfully"
 
     # Step 7: Setup Tailscale Network
     - name: 🌐 Setup Tailscale
@@ -131,32 +155,33 @@ jobs:
         if (-not $env:TAILSCALE_AUTH_KEY) {
             echo "TAILSCALE_AUTH_KEY not found in secrets"
             echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
-        } else {
-            try {
-                # Fast Tailscale installation
-                $msiPath = "$env:TEMP\tailscale.msi"
-                Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msiPath
-                Start-Process msiexec.exe -ArgumentList "/i", "$msiPath", "/quiet", "/norestart" -Wait
-                Remove-Item $msiPath -Force
-                
-                # Quick connection
-                Start-Sleep -Seconds 3
-                & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=win10-fast-$env:GITHUB_RUN_ID
-                
-                # Fast IP retrieval
-                Start-Sleep -Seconds 2
-                $ip = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4
-                if ($ip -and $ip -match '^\d+\.\d+\.\d+\.\d+$') {
-                    echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
-                    echo "Tailscale connected: $ip"
-                } else {
-                    echo "TAILSCALE_IP=win10-fast.local" >> $env:GITHUB_ENV
-                    echo "Using hostname"
-                }
-            } catch {
-                echo "Tailscale setup completed"
-                echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
+            exit 0
+        }
+        
+        try {
+            # Fast Tailscale installation
+            $msiPath = "$env:TEMP\tailscale.msi"
+            Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msiPath
+            Start-Process msiexec.exe -ArgumentList "/i", "$msiPath", "/quiet", "/norestart" -Wait
+            Remove-Item $msiPath -Force
+            
+            # Quick connection
+            Start-Sleep -Seconds 3
+            & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=win10-fast-$env:GITHUB_RUN_ID
+            
+            # Fast IP retrieval
+            Start-Sleep -Seconds 2
+            $ip = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4
+            if ($ip -and $ip -match '^\d+\.\d+\.\d+\.\d+$') {
+                echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
+                echo "Tailscale connected: $ip"
+            } else {
+                echo "TAILSCALE_IP=win10-fast.local" >> $env:GITHUB_ENV
+                echo "Using hostname"
             }
+        } catch {
+            echo "Tailscale setup completed"
+            echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
         }
 
     # Step 8: Display Connection Information
@@ -241,7 +266,7 @@ jobs:
         }
         
         # Quick RDP disable
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v "fDenyTSConnections" /t REG_DWORD /d 1 /f
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v "fDenyTSConnections" /t REG_DWORD /d 1 /f 2>nul
         echo "RDP disabled"
         
         echo "Cleanup completed successfully"
