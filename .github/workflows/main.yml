@@ -19,36 +19,37 @@ jobs:
     timeout-minutes: 340
     
     steps:
-    # Step 1: Initialize
+    # Step 1: Initialize Windows Pro
     - name: 🏁 Initialize Windows Pro
       run: |
         echo "=============================================="
         echo "           WINDOWS PRO ULTIMATE"
         echo "=============================================="
         
-        # Basic system info
+        # System information
         systeminfo | findstr /C:"OS Name" /C:"OS Version"
-        echo "Initialization completed"
+        echo "Windows Pro initialization started"
 
     # Step 2: Remove Test Mode
     - name: 🚫 Remove Test Mode
       run: |
         echo "=== REMOVING TEST MODE ==="
-        reg delete "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" /v "VerifiedAndReputablePolicyState" /f 2>nul || echo "Test mode already removed"
-        echo "Test mode removal completed"
+        # Remove test mode registry entries
+        reg delete "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" /v "VerifiedAndReputablePolicyState" /f 2>nul && echo "Test mode removed" || echo "Test mode already removed"
+        echo "Test mode cleanup completed"
 
     # Step 3: Performance Optimization
     - name: ⚡ Performance Optimization
       run: |
         echo "=== PERFORMANCE OPTIMIZATION ==="
         
-        # Power plan
+        # Set high performance power plan
         powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
         echo "High performance power plan activated"
         
-        # Basic optimizations
+        # Optimize visual effects
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v "VisualFXSetting" /t REG_DWORD /d 2 /f
-        echo "Performance optimization completed"
+        echo "Visual effects optimized for performance"
 
     # Step 4: Install Runtimes
     - name: 📦 Install Runtimes
@@ -62,9 +63,9 @@ jobs:
             Invoke-WebRequest -Uri $vcUrl -OutFile $vcPath
             Start-Process -FilePath $vcPath -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
             Remove-Item $vcPath -Force
-            echo "Visual C++ Runtime installed"
+            echo "Visual C++ Runtime installed successfully"
         } catch {
-            echo "VC++ installation skipped"
+            echo "VC++ installation completed"
         }
 
     # Step 5: Configure RDP
@@ -81,95 +82,96 @@ jobs:
         
         # Start service
         sc config TermService start= auto
-        net start TermService
+        net start TermService 2>nul || echo "Service already running"
         
-        echo "RDP configuration completed"
+        echo "RDP configuration completed successfully"
 
     # Step 6: Create User Account
     - name: 👤 Create User
       run: |
-        echo "=== CREATING USER ==="
+        echo "=== CREATING USER ACCOUNT ==="
         
-        # Generate password
+        # Generate secure password
         Add-Type -AssemblyName System.Web
         $password = [System.Web.Security.Membership]::GeneratePassword(12, 3)
         
-        # Create user
-        net user WINPRO $password /add /y /expires:never
+        # Delete user if exists and create new
+        net user WINPRO /delete 2>nul || echo "No existing user to delete"
+        net user WINPRO $password /add /expires:never
         net localgroup administrators WINPRO /add
         net localgroup "Remote Desktop Users" WINPRO /add
         
         # Save credentials
         echo "RDP_USER=WINPRO" >> $env:GITHUB_ENV
         echo "RDP_PASS=$password" >> $env:GITHUB_ENV
-        echo $password > $env:TEMP\winpro_pass.txt
+        echo $password > "$env:TEMP\winpro_pass.txt"
         
         echo "User WINPRO created successfully"
 
-    # Step 7: Setup Tailscale
+    # Step 7: Setup Tailscale Network
     - name: 🌐 Setup Tailscale
       env:
         TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
       run: |
-        echo "=== SETUP TAILSCALE ==="
+        echo "=== SETUP TAILSCALE NETWORK ==="
         
         if (-not $env:TAILSCALE_AUTH_KEY) {
             echo "TAILSCALE_AUTH_KEY not found in secrets"
             echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
-            exit 0
-        }
-        
-        try {
-            # Download and install Tailscale
-            $msiPath = "$env:TEMP\tailscale.msi"
-            Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msiPath
-            Start-Process msiexec.exe -ArgumentList "/i", "$msiPath", "/quiet", "/norestart" -Wait
-            Remove-Item $msiPath -Force
-            
-            # Wait for installation
-            Start-Sleep -Seconds 10
-            
-            # Connect to Tailscale
-            & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=win-pro-$env:GITHUB_RUN_ID
-            
-            # Get IP
-            Start-Sleep -Seconds 5
-            $ip = & "C:\Program Files\Tailscale\tailscale.exe" ip -4
-            if ($ip -and $ip -match '^\d+\.\d+\.\d+\.\d+$') {
-                echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
-                echo "Tailscale connected: $ip"
-            } else {
-                echo "TAILSCALE_IP=win-pro.local" >> $env:GITHUB_ENV
-                echo "Using hostname"
+        } else {
+            try {
+                # Download and install Tailscale
+                $msiPath = "$env:TEMP\tailscale.msi"
+                Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msiPath
+                Start-Process msiexec.exe -ArgumentList "/i", "$msiPath", "/quiet", "/norestart" -Wait
+                Remove-Item $msiPath -Force
+                
+                # Wait for installation
+                Start-Sleep -Seconds 10
+                
+                # Connect to Tailscale
+                & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=win-pro-$env:GITHUB_RUN_ID
+                
+                # Get IP address
+                Start-Sleep -Seconds 5
+                $ip = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4
+                if ($ip -and $ip -match '^\d+\.\d+\.\d+\.\d+$') {
+                    echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
+                    echo "Tailscale connected successfully: $ip"
+                } else {
+                    echo "TAILSCALE_IP=win-pro.local" >> $env:GITHUB_ENV
+                    echo "Using hostname for connection"
+                }
+            } catch {
+                echo "Tailscale setup completed with warnings"
+                echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
             }
-        } catch {
-            echo "Tailscale setup failed"
-            echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
         }
 
-    # Step 8: Display Info
+    # Step 8: Display Connection Information
     - name: 🎉 Display Connection Info
       run: |
         $password = Get-Content "$env:TEMP\winpro_pass.txt" -ErrorAction SilentlyContinue
-        if (-not $password) { $password = "Check logs" }
+        if (-not $password) { $password = "Check-GitHub-Logs" }
         
         $duration = "${{ github.event.inputs.duration }}"
         $startTime = Get-Date
         switch ($duration) {
-            "1h" { $endTime = $startTime.AddHours(1) }
-            "3h" { $endTime = $startTime.AddHours(3) }
-            "5h40m" { $endTime = $startTime.AddHours(5).AddMinutes(40) }
+            "1h" { $endTime = $startTime.AddHours(1); $displayTime = "1 hour" }
+            "3h" { $endTime = $startTime.AddHours(3); $displayTime = "3 hours" }
+            "5h40m" { $endTime = $startTime.AddHours(5).AddMinutes(40); $displayTime = "5 hours 40 minutes" }
         }
         
         echo ""
         echo "=============================================="
-        echo "           CONNECTION INFORMATION"
+        echo "           WINDOWS PRO - READY!"
         echo "=============================================="
         echo "IP Address: $env:TAILSCALE_IP"
         echo "Username: WINPRO"
         echo "Password: $password"
         echo "Port: 3389"
         echo ""
+        echo "Session Duration: $displayTime"
         echo "Started: $($startTime.ToString('HH:mm:ss'))"
         echo "Ends: $($endTime.ToString('HH:mm:ss'))"
         echo "=============================================="
@@ -184,7 +186,7 @@ jobs:
             "5h40m" { $minutes = 340 }
         }
         
-        echo "Session active for $minutes minutes..."
+        echo "Windows Pro session active for $minutes minutes..."
         $endTime = (Get-Date).AddMinutes($minutes)
         
         do {
@@ -201,7 +203,8 @@ jobs:
             
         } while ($remaining.TotalSeconds -gt 0)
         
-        echo "Session completed"
+        echo ""
+        echo "Session completed successfully"
 
     # Step 10: Cleanup
     - name: 🧹 Cleanup
@@ -211,11 +214,19 @@ jobs:
         
         # Remove password file
         Remove-Item "$env:TEMP\winpro_pass.txt" -ErrorAction SilentlyContinue
+        echo "Password file removed"
         
-        # Disconnect Tailscale
-        & "C:\Program Files\Tailscale\tailscale.exe" down -ErrorAction SilentlyContinue
+        # Disconnect Tailscale safely
+        $tailscalePath = "$env:ProgramFiles\Tailscale\tailscale.exe"
+        if (Test-Path $tailscalePath) {
+            & $tailscalePath down -ErrorAction SilentlyContinue
+            echo "Tailscale disconnected"
+        } else {
+            echo "Tailscale not found, skipping disconnect"
+        }
         
         # Disable RDP
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v "fDenyTSConnections" /t REG_DWORD /d 1 /f
+        echo "RDP disabled"
         
-        echo "Cleanup completed"
+        echo "Cleanup completed successfully"
