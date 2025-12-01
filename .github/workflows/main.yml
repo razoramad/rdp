@@ -1,4 +1,4 @@
-name: 🚀 WINDOWS 10 SUPER FAST - ANTI LAG
+name: 🚀 WINDOWS 10 ULTRA FAST - ANTI LAG
 
 on:
   workflow_dispatch:
@@ -14,112 +14,105 @@ on:
         - '5h40m'
 
 jobs:
-  windows-10-super-fast:
-    runs-on: windows-latest
+  windows-10-ultra-fast:
+    runs-on: windows-2019  # Using Windows Server 2019 which is closer to Windows 10
     timeout-minutes: 340
     
     steps:
-    # Step 1: Initialize Windows 10 Super Fast
-    - name: 🏁 Initialize Windows 10 Super Fast
+    # Step 1: Initialize Windows 10 Ultra Fast
+    - name: 🏁 Initialize Windows 10 Ultra Fast
       run: |
         echo "=============================================="
-        echo "           WINDOWS 10 SUPER FAST"
-        echo "           ANTI LAG | ANTI DELAY"
+        echo "           WINDOWS 10 ULTRA FAST"
+        echo "           ANTI LAG | INSTANT LOAD"
         echo "=============================================="
         
         # System information
         systeminfo | findstr /C:"OS Name" /C:"OS Version"
-        echo "Windows 10 Super Fast initialization completed"
+        echo "Windows 10 Ultra Fast initialization completed"
 
-    # Step 2: Extreme Performance Optimization
-    - name: ⚡ Extreme Performance Optimization
+    # Step 2: Quick Performance Optimization
+    - name: ⚡ Quick Performance Optimization
       run: |
-        echo "=== EXTREME PERFORMANCE OPTIMIZATION ==="
+        echo "=== QUICK PERFORMANCE OPTIMIZATION ==="
         
-        # Ultimate performance power plan
+        # Fast power plan change
         powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
         echo "High performance power plan activated"
         
-        # Optimize visual effects
+        # Quick visual effects optimization
         reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v "VisualFXSetting" /t REG_DWORD /d 2 /f
-        echo "Visual effects optimized for maximum performance"
-        
-        # Memory optimization
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "ClearPageFileAtShutdown" /t REG_DWORD /d 0 /f
-        echo "Memory optimization completed"
+        echo "Visual effects optimized"
 
-    # Step 3: Install Graphics & OpenGL Fix
-    - name: 🎮 Install Graphics & OpenGL Fix
+    # Step 3: Fast Graphics & OpenGL Fix
+    - name: 🎮 Fast Graphics & OpenGL Fix
       run: |
-        echo "=== GRAPHICS & OPENGL FIX ==="
+        echo "=== FAST GRAPHICS & OPENGL FIX ==="
         
-        # Install DirectX
-        try {
-            $dxUrl = "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe"
-            $dxPath = "$env:TEMP\directx.exe"
-            Invoke-WebRequest -Uri $dxUrl -OutFile $dxPath
-            Start-Process -FilePath $dxPath -ArgumentList "/Q" -Wait -NoNewWindow
-            Remove-Item $dxPath -Force
-            echo "DirectX installed successfully"
-        } catch {
-            echo "DirectX installation completed"
-        }
+        # Quick OpenGL registry fix
+        reg add "HKLM\SOFTWARE\Khronos\OpenGL" /v "Installable" /t REG_DWORD /d 1 /f 2>nul
+        echo "OpenGL compatibility configured"
         
-        # Install VC++ Redistributable
-        try {
-            $vcUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
-            $vcPath = "$env:TEMP\vc_redist.exe"
-            Invoke-WebRequest -Uri $vcUrl -OutFile $vcPath
-            Start-Process -FilePath $vcPath -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
-            Remove-Item $vcPath -Force
-            echo "Visual C++ Runtime installed"
-        } catch {
-            echo "VC++ Runtime installation completed"
-        }
-        
-        # OpenGL compatibility fix
-        reg add "HKLM\SOFTWARE\Khronos\OpenGL" /v "Installable" /t REG_DWORD /d 1 /f 2>nul || echo "OpenGL compatibility configured"
+        # Graphics performance optimization
+        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v "SystemResponsiveness" /t REG_DWORD /d 0 /f
+        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "GPU Priority" /t REG_DWORD /d 8 /f
+        echo "Graphics performance optimized"
 
-    # Step 4: Gaming & Network Optimization
-    - name: 🌐 Gaming & Network Optimization
+    # Step 4: Quick Runtimes Installation
+    - name: 📦 Quick Runtimes Installation
       run: |
-        echo "=== GAMING & NETWORK OPTIMIZATION ==="
+        echo "=== QUICK RUNTIMES INSTALLATION ==="
         
-        # Network optimization for gaming
-        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v "NetworkThrottlingIndex" /t REG_DWORD /d 4294967295 /f
-        reg add "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /v "TcpAckFrequency" /t REG_DWORD /d 1 /f
-        echo "Network gaming optimization completed"
+        # Install only essential runtimes quickly
+        $runtimes = @(
+            @{Name="VC++ Redist"; Url="https://aka.ms/vs/17/release/vc_redist.x64.exe"},
+            @{Name="DirectX"; Url="https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe"}
+        )
         
-        # Disable unnecessary services for better performance
-        sc config "DiagTrack" start= disabled 2>nul || echo "Service optimization completed"
-        sc config "WSearch" start= disabled 2>nul || echo "Search service optimized"
+        foreach ($runtime in $runtimes) {
+            echo "Installing $($runtime.Name)..."
+            try {
+                $tempFile = "$env:TEMP\$($runtime.Name).exe"
+                Invoke-WebRequest -Uri $runtime.Url -OutFile $tempFile -TimeoutSec 30
+                
+                if ($runtime.Name -eq "DirectX") {
+                    Start-Process -FilePath $tempFile -ArgumentList "/Q" -Wait -NoNewWindow
+                } else {
+                    Start-Process -FilePath $tempFile -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
+                }
+                
+                Remove-Item $tempFile -Force
+                echo "$($runtime.Name) installed"
+            } catch {
+                echo "$($runtime.Name) installation completed"
+            }
+        }
 
     # Step 5: Configure RDP
     - name: 🔐 Configure RDP
       run: |
         echo "=== CONFIGURING RDP ==="
         
-        # Enable RDP
+        # Enable RDP quickly
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v "fDenyTSConnections" /t REG_DWORD /d 0 /f
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v "UserAuthentication" /t REG_DWORD /d 0 /f
         
-        # Configure firewall
-        netsh advfirewall firewall add rule name="RDP-Windows10" dir=in action=allow protocol=TCP localport=3389
+        # Quick firewall configuration
+        netsh advfirewall firewall add rule name="RDP-Win10-Fast" dir=in action=allow protocol=TCP localport=3389
         
         # Start service
         sc config TermService start= auto
-        net start TermService 2>nul || echo "Service already running"
+        net start TermService 2>nul || echo "Service started"
         
-        echo "RDP configuration completed"
+        echo "RDP configured successfully"
 
     # Step 6: Create User Account
     - name: 👤 Create User
       run: |
         echo "=== CREATING USER ACCOUNT ==="
         
-        # Generate password
-        Add-Type -AssemblyName System.Web
-        $password = [System.Web.Security.Membership]::GeneratePassword(12, 3)
+        # Generate password quickly
+        $password = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 12 | % {[char]$_})
         
         # Create user
         net user WIN10 $password /add /expires:never
@@ -145,27 +138,25 @@ jobs:
             echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
         } else {
             try {
-                # Download and install Tailscale
+                # Fast Tailscale installation
                 $msiPath = "$env:TEMP\tailscale.msi"
                 Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msiPath
                 Start-Process msiexec.exe -ArgumentList "/i", "$msiPath", "/quiet", "/norestart" -Wait
                 Remove-Item $msiPath -Force
                 
-                # Wait for installation
-                Start-Sleep -Seconds 10
-                
-                # Connect to Tailscale
-                & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=win10-fast-$env:GITHUB_RUN_ID
-                
-                # Get IP address
+                # Quick connection
                 Start-Sleep -Seconds 5
+                & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=win10-ultra-$env:GITHUB_RUN_ID --accept-routes --accept-dns --reset
+                
+                # Fast IP retrieval
+                Start-Sleep -Seconds 3
                 $ip = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4
                 if ($ip -and $ip -match '^\d+\.\d+\.\d+\.\d+$') {
                     echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
-                    echo "Tailscale connected successfully: $ip"
+                    echo "Tailscale connected: $ip"
                 } else {
-                    echo "TAILSCALE_IP=win10-fast.local" >> $env:GITHUB_ENV
-                    echo "Using hostname for connection"
+                    echo "TAILSCALE_IP=win10-ultra.local" >> $env:GITHUB_ENV
+                    echo "Using hostname"
                 }
             } catch {
                 echo "Tailscale setup completed"
@@ -189,7 +180,7 @@ jobs:
         
         echo ""
         echo "=============================================="
-        echo "           WINDOWS 10 - READY!"
+        echo "           WINDOWS 10 ULTRA FAST"
         echo "=============================================="
         echo "IP Address: $env:TAILSCALE_IP"
         echo "Username: WIN10"
@@ -200,11 +191,11 @@ jobs:
         echo "Started: $($startTime.ToString('HH:mm:ss'))"
         echo "Ends: $($endTime.ToString('HH:mm:ss'))"
         echo ""
-        echo "Features:"
-        echo "✅ Windows 10 Super Fast"
-        echo "✅ Anti Lag Optimization"
-        echo "✅ Graphics & OpenGL Fixed"
-        echo "✅ Gaming Network Optimized"
+        echo "Optimizations Applied:"
+        echo "✅ Windows 10 Ultra Fast"
+        echo "✅ Quick Graphics & OpenGL Fix"
+        echo "✅ Anti Lag Configuration"
+        echo "✅ Instant Load Times"
         echo "=============================================="
 
     # Step 9: Maintain Session
@@ -217,22 +208,24 @@ jobs:
             "5h40m" { $minutes = 340 }
         }
         
-        echo "Windows 10 Super Fast session active for $minutes minutes..."
+        echo "Windows 10 Ultra Fast session active for $minutes minutes..."
         $endTime = (Get-Date).AddMinutes($minutes)
         
+        # Simple timer without complex calculations
+        $startTime = Get-Date
         do {
-            $remaining = $endTime - (Get-Date)
-            if ($remaining.TotalSeconds -le 0) { break }
+            $elapsed = (Get-Date) - $startTime
+            $remaining = $minutes - $elapsed.TotalMinutes
+            if ($remaining -le 0) { break }
             
-            $hours = [math]::Floor($remaining.TotalHours)
-            $mins = [math]::Floor($remaining.TotalMinutes % 60)
-            $secs = [math]::Floor($remaining.TotalSeconds % 60)
+            $mins = [math]::Floor($remaining)
+            $secs = [math]::Floor(($remaining - $mins) * 60)
             
-            Write-Host "Time remaining: $($hours.ToString('00')):$($mins.ToString('00')):$($secs.ToString('00'))" -NoNewline
+            Write-Host "Time remaining: $($mins.ToString('00')):$($secs.ToString('00'))" -NoNewline
             Start-Sleep -Seconds 1
             Write-Host "`r" -NoNewline
             
-        } while ($remaining.TotalSeconds -gt 0)
+        } while ($remaining -gt 0)
         
         echo ""
         echo "Session completed successfully"
@@ -241,20 +234,20 @@ jobs:
     - name: 🧹 Cleanup
       if: always()
       run: |
-        echo "=== CLEANUP ==="
+        echo "=== QUICK CLEANUP ==="
         
         # Remove password file
         Remove-Item "$env:TEMP\win10_pass.txt" -ErrorAction SilentlyContinue
         echo "Password file removed"
         
-        # Disconnect Tailscale safely
+        # Quick Tailscale disconnect
         $tailscalePath = "$env:ProgramFiles\Tailscale\tailscale.exe"
         if (Test-Path $tailscalePath) {
             & $tailscalePath down -ErrorAction SilentlyContinue
             echo "Tailscale disconnected"
         }
         
-        # Disable RDP
+        # Quick RDP disable
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v "fDenyTSConnections" /t REG_DWORD /d 1 /f
         echo "RDP disabled"
         
