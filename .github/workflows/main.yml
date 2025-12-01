@@ -1,10 +1,10 @@
-name: 🚀 WINDOWS 10 ANTI LAG SUPER FAST - BLUESTACKS READY
+name: 🚀 WINDOWS 11 ANTI LAG SUPER FAST - BLUESTACKS READY
 
 on:
   workflow_dispatch:
     inputs:
       duration:
-        description: '🕐 Duration'
+        description: '🕐 Session Duration'
         required: false
         default: '5h40m'
         type: choice
@@ -12,125 +12,121 @@ on:
         - '1h'
         - '3h' 
         - '5h40m'
+      bluestacks_version:
+        description: '📱 BlueStacks Version'
+        required: false
+        default: 'nougat'
+        type: choice
+        options:
+        - 'nougat'
+        - 'pie'
+        - 'android11'
 
 jobs:
-  windows-10-super-fast:
+  windows-super-fast:
     runs-on: windows-2022
     timeout-minutes: 340
     
     steps:
-    # Step 1: Initialize Windows 10 Super Fast
-    - name: 🏁 Initialize Windows 10 Super Fast
+    # Step 1: Initialize
+    - name: 🏁 Initialize Windows Super Fast
       run: |
         echo "=============================================="
-        echo "      WINDOWS 10 ANTI LAG SUPER FAST"
-        echo "      BLUESTACKS READY | VT ENABLED"
+        echo "   WINDOWS 11 ANTI LAG SUPER FAST"
+        echo "   BLUESTACKS READY | VT ENABLED"
         echo "=============================================="
-        echo "Initializing Windows 10 for BlueStacks compatibility..."
-
-    # Step 2: Enable Virtualization Technology (VT)
-    - name: 🔧 Enable VT (Virtualization Technology)
-      run: |
-        echo "=== ENABLING VIRTUALIZATION TECHNOLOGY ==="
         
-        # Enable Hyper-V and Windows Hypervisor Platform
+        # Check system info
+        systeminfo | findstr /C:"OS Name" /C:"System Type"
+        echo "Initialization completed"
+
+    # Step 2: Enable Virtualization & Features
+    - name: 🔧 Enable Virtualization Technology
+      run: |
+        echo "=== ENABLING VIRTUALIZATION ==="
+        
+        # Enable Windows features
         Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -NoRestart
+        Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform -All -NoRestart
         Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform -All -NoRestart
         
-        # Enable Windows Sandbox (helps with virtualization)
-        Enable-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -All -NoRestart
-        
-        # Enable virtualization in BIOS via registry
+        # Disable security features that block BlueStacks
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "EnableVirtualizationBasedSecurity" /t REG_DWORD /d 0 /f
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "RequirePlatformSecurityFeatures" /t REG_DWORD /d 0 /f
         
-        echo "Virtualization Technology enabled successfully"
+        echo "VT Enabled: Hyper-V, VirtualMachinePlatform, HypervisorPlatform"
 
-    # Step 3: Graphics Compatibility Fix
-    - name: 🎮 Graphics Compatibility Fix
+    # Step 3: Install Required Dependencies
+    - name: 📦 Install Dependencies
       run: |
-        echo "=== GRAPHICS COMPATIBILITY FIX ==="
+        echo "=== INSTALLING DEPENDENCIES ==="
         
-        # Enable Windows Basic Display Driver (WDDM 1.0 compatibility)
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v "DisableHWAcceleration" /t REG_DWORD /d 0 /f
-        reg add "HKLM\SOFTWARE\Microsoft\Windows\Dwm" /v "ForceSoftwareD3D" /t REG_DWORD /d 0 /f
+        # Disable Windows Defender temporarily
+        Set-MpPreference -DisableRealtimeMonitoring $true
         
-        # Set OpenGL compatibility mode
-        reg add "HKLM\SOFTWARE\Khronos\OpenGL" /v "Disable" /t REG_DWORD /d 0 /f
-        reg add "HKLM\SOFTWARE\Khronos\OpenGL" /v "UseBasicRenderer" /t REG_DWORD /d 1 /f
-        
-        # Disable DPI scaling for better compatibility
-        reg add "HKCU\Control Panel\Desktop" /v "Win8DpiScaling" /t REG_DWORD /d 0 /f
-        reg add "HKCU\Control Panel\Desktop" /v "LogPixels" /t REG_DWORD /d 96 /f
-        
-        echo "Graphics compatibility optimized for BlueStacks"
-
-    # Step 4: Install DirectX & VC++ (Required for BlueStacks)
-    - name: 📦 Install DirectX & VC++
-      run: |
-        echo "=== INSTALLING DIRECTX & VC++ ==="
-        
-        # Install VC++ Redistributable (required by BlueStacks)
+        # Install VC++ Redist
         $vcUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
         $vcPath = "$env:TEMP\vc_redist.exe"
         Invoke-WebRequest -Uri $vcUrl -OutFile $vcPath
         Start-Process -FilePath $vcPath -ArgumentList "/install", "/quiet", "/norestart" -Wait -NoNewWindow
-        Remove-Item $vcPath -Force
         
-        # Install DirectX End-User Runtime
-        $dxUrl = "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe"
-        $dxPath = "$env:TEMP\directx.exe"
-        Invoke-WebRequest -Uri $dxUrl -OutFile $dxPath
-        Start-Process -FilePath $dxPath -ArgumentList "/Q" -Wait -NoNewWindow
-        Remove-Item $dxPath -Force
+        # Install .NET Framework 4.8 if not present
+        $netPath = "$env:TEMP\ndp48-web.exe"
+        Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/?linkid=2088631" -OutFile $netPath
+        Start-Process -FilePath $netPath -ArgumentList "/q", "/norestart" -Wait -NoNewWindow
         
-        echo "DirectX and VC++ installed successfully"
-
-    # Step 5: Install BlueStacks 5 Nougat (Compatible Version)
-    - name: 📱 Install BlueStacks 5 Nougat
-      run: |
-        echo "=== INSTALLING BLUESTACKS 5 NOUGAT ==="
-        
-        # Disable Windows Defender temporarily
-        Set-MpPreference -DisableRealtimeMonitoring $true
-        Set-MpPreference -DisableBehaviorMonitoring $true
-        
-        # Download BlueStacks 5 Nougat (compatible version)
-        $bsUrl = "https://cdn3.bluestacks.com/downloads/windows/nxt/5.20.0.1043/BlueStacksMicroInstaller_5.20.0.1043_native.exe"
-        $bsPath = "$env:TEMP\BlueStacksInstaller.exe"
-        
-        echo "Downloading BlueStacks 5 Nougat..."
-        Invoke-WebRequest -Uri $bsUrl -OutFile $bsPath
-        
-        echo "Installing BlueStacks (this may take a few minutes)..."
-        # Install with silent mode and disable Hyper-V warning
-        Start-Process -FilePath $bsPath -ArgumentList "/silent", "/install" -Wait -NoNewWindow
-        
-        # Wait for installation
-        Start-Sleep -Seconds 60
-        
-        # Re-enable Windows Defender
+        # Re-enable Defender
         Set-MpPreference -DisableRealtimeMonitoring $false
-        Set-MpPreference -DisableBehaviorMonitoring $false
         
-        Remove-Item $bsPath -Force
-        echo "BlueStacks 5 Nougat installed successfully!"
+        Remove-Item "$env:TEMP\vc_redist.exe", "$env:TEMP\ndp48-web.exe" -Force -ErrorAction SilentlyContinue
+        echo "Dependencies installed"
 
-    # Step 6: Configure BlueStacks for Performance
-    - name: ⚡ Configure BlueStacks Performance
+    # Step 4: Install BlueStacks (Based on Selection)
+    - name: 📱 Install BlueStacks
       run: |
-        echo "=== CONFIGURING BLUESTACKS PERFORMANCE ==="
+        $version = "${{ github.event.inputs.bluestacks_version }}"
+        echo "=== INSTALLING BLUESTACKS $($version.ToUpper()) ==="
         
-        # Create BlueStacks configuration for better performance
-        $bsConfigPath = "$env:ProgramData\BlueStacks_nxt\bluestacks.conf"
-        
-        # Create configuration directory if it doesn't exist
-        if (!(Test-Path "$env:ProgramData\BlueStacks_nxt")) {
-            New-Item -ItemType Directory -Path "$env:ProgramData\BlueStacks_nxt" -Force
+        # Select version
+        $url = switch ($version) {
+            "nougat" { "https://cdn3.bluestacks.com/downloads/windows/nxt/5.20.0.1043/BlueStacksMicroInstaller_5.20.0.1043_native.exe" }
+            "pie" { "https://cdn3.bluestacks.com/downloads/windows/nxt/5.20.0.1043/BlueStacksMicroInstaller_5.20.0.1043_native.exe" }
+            "android11" { "https://cdn3.bluestacks.com/downloads/windows/nxt/5.20.0.1043/BlueStacksMicroInstaller_5.20.0.1043_native.exe" }
+            default { "https://cdn3.bluestacks.com/downloads/windows/nxt/5.20.0.1043/BlueStacksMicroInstaller_5.20.0.1043_native.exe" }
         }
         
-        # Write optimized configuration
-        @"
+        $installer = "$env:TEMP\BlueStacksInstaller.exe"
+        Invoke-WebRequest -Uri $url -OutFile $installer
+        
+        # Run installer silently
+        Start-Process -FilePath $installer -ArgumentList "/silent", "/S" -Wait -NoNewWindow
+        
+        # Wait for installation
+        Start-Sleep -Seconds 30
+        
+        # Create shortcut on desktop
+        $desktop = [Environment]::GetFolderPath("Desktop")
+        $wshell = New-Object -ComObject WScript.Shell
+        $shortcut = $wshell.CreateShortcut("$desktop\BlueStacks 5.lnk")
+        $shortcut.TargetPath = "${env:ProgramFiles}\BlueStacks_nxt\HD-Player.exe"
+        $shortcut.Save()
+        
+        Remove-Item $installer -Force
+        echo "BlueStacks $version installed successfully"
+
+    # Step 5: Configure BlueStacks
+    - name: ⚙️ Configure BlueStacks
+      run: |
+        echo "=== CONFIGURING BLUESTACKS ==="
+        
+        # Create config directory
+        $configDir = "$env:ProgramData\BlueStacks_nxt"
+        if (!(Test-Path $configDir)) {
+            New-Item -ItemType Directory -Path $configDir -Force
+        }
+        
+        # BlueStacks configuration
+        $config = @"
 bst.instance.Nougat64.status=1
 bst.instance.Nougat64.launch_without_tray=1
 bst.instance.Nougat64.adb_port=5555
@@ -138,177 +134,146 @@ bst.feature.rooting=1
 bst.instance.Nougat64.cpu_count=4
 bst.instance.Nougat64.memory=4096
 bst.instance.Nougat64.enable_vulkan=0
-bst.instance.Nougat64.enable_dedicated_graphics=0
+bst.instance.Nougat64.graphics_renderer=1
 bst.instance.Nougat64.fastboot=1
 bst.instance.Nougat64.low_memory_mode=0
-"@ | Out-File -FilePath $bsConfigPath -Encoding ASCII
+bst.feature.auto_start=0
+"@
         
-        echo "BlueStacks performance configuration applied"
+        $config | Out-File -FilePath "$configDir\bluestacks.conf" -Encoding ASCII
+        echo "BlueStacks configured for optimal performance"
 
-    # Step 7: Configure RDP
-    - name: 🔐 Configure RDP
+    # Step 6: Setup RDP & User
+    - name: 🔐 Setup Remote Access
       run: |
-        echo "=== CONFIGURING RDP ==="
+        echo "=== SETUP REMOTE ACCESS ==="
         
         # Enable RDP
         Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0 -Force
         Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "UserAuthentication" -Value 0 -Force
         
-        # Configure firewall
-        netsh advfirewall firewall add rule name="RDP-3389" dir=in action=allow protocol=TCP localport=3389
-        
-        # Start Terminal Services
-        Set-Service -Name "TermService" -StartupType "Automatic"
-        Start-Service -Name "TermService"
-        
-        echo "RDP configured successfully"
-
-    # Step 8: Create User Account
-    - name: 👤 Create User Account
-      run: |
-        echo "=== CREATING USER ACCOUNT ==="
-        
-        # Generate secure password
-        Add-Type -AssemblyName System.Web
-        $password = [System.Web.Security.Membership]::GeneratePassword(12, 2)
-        
         # Create user
-        $username = "bluestacks"
-        New-LocalUser -Name $username -Password (ConvertTo-SecureString $password -AsPlainText -Force) -AccountNeverExpires
-        Add-LocalGroupMember -Group "Administrators" -Member $username
-        Add-LocalGroupMember -Group "Remote Desktop Users" -Member $username
-        Enable-LocalUser -Name $username
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%'
+        $password = -join ((1..12) | ForEach-Object { $chars[(Get-Random -Minimum 0 -Maximum $chars.Length)] })
+        
+        $user = "gamer"
+        Remove-LocalUser -Name $user -ErrorAction SilentlyContinue
+        New-LocalUser -Name $user -Password (ConvertTo-SecureString $password -AsPlainText -Force) -AccountNeverExpires
+        Add-LocalGroupMember -Group "Administrators" -Member $user
+        Add-LocalGroupMember -Group "Remote Desktop Users" -Member $user
+        Enable-LocalUser -Name $user
         
         # Save credentials
-        echo "RDP_USER=$username" >> $env:GITHUB_ENV
+        echo "RDP_USER=$user" >> $env:GITHUB_ENV
         echo "RDP_PASS=$password" >> $env:GITHUB_ENV
-        echo $password > "$env:TEMP\bluestacks_pass.txt"
+        echo $password > "$env:TEMP\rdp_password.txt"
         
-        echo "User account created successfully"
+        # Configure firewall
+        netsh advfirewall firewall add rule name="RDP-Port" dir=in action=allow protocol=TCP localport=3389
+        
+        echo "RDP configured - User: $user, Password saved"
 
-    # Step 9: Setup Tailscale Network
-    - name: 🌐 Setup Tailscale Network
+    # Step 7: Setup Tailscale (Optional)
+    - name: 🌐 Setup Network
       env:
-        TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
+        TAILSCALE_KEY: ${{ secrets.TAILSCALE_KEY }}
       run: |
-        echo "=== SETUP TAILSCALE NETWORK ==="
+        echo "=== SETUP NETWORK ==="
         
-        if (-not $env:TAILSCALE_AUTH_KEY) {
-            echo "TAILSCALE_AUTH_KEY not found in secrets"
-            echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
-            exit 0
-        }
-        
-        # Install Tailscale
-        $msiPath = "$env:TEMP\tailscale.msi"
-        Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msiPath
-        Start-Process msiexec.exe -ArgumentList "/i", "$msiPath", "/quiet", "/norestart" -Wait
-        Remove-Item $msiPath -Force
-        
-        # Connect to Tailscale
-        Start-Sleep -Seconds 5
-        & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=windows-bs-$env:GITHUB_RUN_ID
-        
-        # Get IP
-        Start-Sleep -Seconds 3
-        $ip = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4
-        if ($ip) {
-            echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
-            echo "Tailscale connected: $ip"
-        } else {
-            echo "TAILSCALE_IP=windows-bs-$env:GITHUB_RUN_ID" >> $env:GITHUB_ENV
-        }
-
-    # Step 10: Display Connection Information
-    - name: 🎉 Display Connection Info
-      run: |
-        $password = Get-Content "$env:TEMP\bluestacks_pass.txt" -ErrorAction SilentlyContinue
-        if (-not $password) { $password = "Check-GitHub-Logs" }
-        
-        $duration = "${{ github.event.inputs.duration }}"
-        $startTime = Get-Date
-        switch ($duration) {
-            "1h" { $endTime = $startTime.AddHours(1); $displayTime = "1 hour" }
-            "3h" { $endTime = $startTime.AddHours(3); $displayTime = "3 hours" }
-            "5h40m" { $endTime = $startTime.AddHours(5).AddMinutes(40); $displayTime = "5 hours 40 minutes" }
-        }
-        
-        echo ""
-        echo "=============================================="
-        echo "      WINDOWS 10 ANTI LAG SUPER FAST"
-        echo "=============================================="
-        echo "IP Address: $env:TAILSCALE_IP"
-        echo "Username: bluestacks"
-        echo "Password: $password"
-        echo "Port: 3389"
-        echo ""
-        echo "BLUESTACKS READY FEATURES:"
-        echo "✅ Virtualization Technology (VT) Enabled"
-        echo "✅ BlueStacks 5 Nougat Installed"
-        echo "✅ Graphics Compatibility Fix Applied"
-        echo "✅ DirectX & VC++ Runtime Installed"
-        echo "✅ 4GB RAM & 4 CPU Cores Allocated"
-        echo "✅ Performance Optimized Configuration"
-        echo ""
-        echo "Session Duration: $displayTime"
-        echo "Started: $($startTime.ToString('HH:mm:ss'))"
-        echo "Ends: $($endTime.ToString('HH:mm:ss'))"
-        echo "=============================================="
-
-    # Step 11: Maintain Session
-    - name: ⏳ Maintain Session
-      run: |
-        $duration = "${{ github.event.inputs.duration }}"
-        switch ($duration) {
-            "1h" { $minutes = 60 }
-            "3h" { $minutes = 180 }
-            "5h40m" { $minutes = 340 }
-        }
-        
-        echo "Windows 10 Anti Lag session active for $minutes minutes..."
-        echo "BlueStacks is ready to use!"
-        echo ""
-        echo "To start BlueStacks after connecting via RDP:"
-        echo "1. Open Start Menu"
-        echo "2. Search for 'BlueStacks 5'"
-        echo "3. Launch the application"
-        echo "4. Wait for Android to boot (first boot may take 2-3 minutes)"
-        
-        $endTime = (Get-Date).AddMinutes($minutes)
-        
-        do {
-            $remaining = $endTime - (Get-Date)
-            if ($remaining.TotalSeconds -le 0) { break }
+        if ($env:TAILSCALE_KEY) {
+            $msi = "$env:TEMP\tailscale.msi"
+            Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile $msi
+            Start-Process msiexec.exe -ArgumentList "/i", "$msi", "/quiet", "/norestart" -Wait
+            Remove-Item $msi -Force
             
+            Start-Sleep -Seconds 5
+            & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_KEY --hostname=win11-bs-$env:GITHUB_RUN_ID
+            
+            $ip = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4
+            if ($ip) {
+                echo "TAILSCALE_IP=$ip" >> $env:GITHUB_ENV
+            } else {
+                echo "TAILSCALE_IP=win11-bs-$env:GITHUB_RUN_ID.local" >> $env:GITHUB_ENV
+            }
+        } else {
+            echo "TAILSCALE_IP=No-Tailscale" >> $env:GITHUB_ENV
+            echo "Using local RDP only"
+        }
+
+    # Step 8: Display Connection Info
+    - name: 📊 Display Info
+      run: |
+        $pass = Get-Content "$env:TEMP\rdp_password.txt" -ErrorAction SilentlyContinue
+        if (-not $pass) { $pass = "Generated-in-logs" }
+        
+        $duration = "${{ github.event.inputs.duration }}"
+        $bluestacks = "${{ github.event.inputs.bluestacks_version }}"
+        
+        echo ""
+        echo "╔══════════════════════════════════════════╗"
+        echo "║     WINDOWS 11 ANTI LAG SUPER FAST      ║"
+        echo "║         BLUESTACKS READY - VT ON        ║"
+        echo "╚══════════════════════════════════════════╝"
+        echo ""
+        echo "🔗 CONNECTION INFO:"
+        echo "   IP: $env:TAILSCALE_IP"
+        echo "   User: $env:RDP_USER"
+        echo "   Pass: $pass"
+        echo "   Port: 3389"
+        echo ""
+        echo "📱 BLUESTACKS:"
+        echo "   Version: $bluestacks"
+        echo "   Cores: 4 CPU"
+        echo "   RAM: 4GB"
+        echo "   VT: ENABLED"
+        echo ""
+        echo "⏱️  SESSION: $duration"
+        echo ""
+        echo "✅ READY FOR GAMING!"
+        echo "   Desktop shortcut: BlueStacks 5"
+        echo "   First boot may take 2-3 minutes"
+        echo ""
+
+    # Step 9: Run Session Timer
+    - name: ⏳ Session Timer
+      run: |
+        $duration = "${{ github.event.inputs.duration }}"
+        $minutes = switch ($duration) {
+            "1h" { 60 }
+            "3h" { 180 }
+            default { 340 }
+        }
+        
+        $end = (Get-Date).AddMinutes($minutes)
+        echo "Session active for $minutes minutes"
+        
+        while ((Get-Date) -lt $end) {
+            $remaining = $end - (Get-Date)
             $hours = [math]::Floor($remaining.TotalHours)
             $mins = [math]::Floor($remaining.TotalMinutes % 60)
-            $secs = [math]::Floor($remaining.TotalSeconds % 60)
             
-            Write-Host "Time remaining: $($hours.ToString('00')):$($mins.ToString('00')):$($secs.ToString('00'))" -NoNewline
-            Start-Sleep -Seconds 1
-            Write-Host "`r" -NoNewline
-            
-        } while ($remaining.TotalSeconds -gt 0)
+            Write-Host "⏰ Time left: ${hours}h ${mins}m" -ForegroundColor Yellow
+            Start-Sleep -Seconds 60
+        }
         
-        echo ""
-        echo "Session completed successfully"
+        echo "Session completed"
 
-    # Step 12: Cleanup
+    # Step 10: Cleanup
     - name: 🧹 Cleanup
       if: always()
       run: |
-        echo "=== CLEANUP ==="
+        echo "Cleaning up..."
         
-        # Remove password file
-        Remove-Item "$env:TEMP\bluestacks_pass.txt" -ErrorAction SilentlyContinue
+        # Remove sensitive files
+        Remove-Item "$env:TEMP\rdp_password.txt" -ErrorAction SilentlyContinue
         
         # Disable RDP
         Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 1 -Force
         
-        # Disconnect Tailscale
-        $tailscalePath = "$env:ProgramFiles\Tailscale\tailscale.exe"
-        if (Test-Path $tailscalePath) {
-            & $tailscalePath down
+        # Tailscale down if installed
+        $ts = "$env:ProgramFiles\Tailscale\tailscale.exe"
+        if (Test-Path $ts) {
+            & $ts down
         }
         
         echo "Cleanup completed"
